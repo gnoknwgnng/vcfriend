@@ -93,12 +93,40 @@ export async function submitIdea(formData: FormData) {
   if (countError) {
     console.error("Error checking IP submission count:", countError);
   } else if (count && count >= 2) {
+    // Save to Spams table (fails silently if table is not created yet)
+    try {
+      await supabase
+        .from("Spams")
+        .insert([{ 
+          content, 
+          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+          contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
+          ipAddress: ip,
+          flaggedReason: "IP Rate Limit Exceeded (Max 2 lifetime submissions)"
+        }]);
+    } catch (err) {
+      console.error("Failed to log spam (rate limit):", err);
+    }
     return { error: "You have reached the maximum limit of 2 pitches per device/IP address." };
   }
 
   // 2. Enforce AI Moderation (Groq Cloud)
   const moderation = await moderatePitchWithAI(content);
   if (moderation.isSpam) {
+    // Save to Spams table (fails silently if table is not created yet)
+    try {
+      await supabase
+        .from("Spams")
+        .insert([{ 
+          content, 
+          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+          contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
+          ipAddress: ip,
+          flaggedReason: `AI Moderation Blocked: ${moderation.reason || "Content does not look like a startup pitch."}`
+        }]);
+    } catch (err) {
+      console.error("Failed to log spam (AI moderation):", err);
+    }
     return { error: `Submission blocked by AI: ${moderation.reason || "Content does not look like a startup pitch."}` };
   }
 

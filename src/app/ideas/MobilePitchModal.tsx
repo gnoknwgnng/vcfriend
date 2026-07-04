@@ -11,17 +11,32 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function MobilePitchModal() {
   const [isOpen, setIsOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAction = async (formData: FormData) => {
-    await submitIdea(formData);
-    setIsOpen(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMsg(null);
+    const formData = new FormData(e.currentTarget);
+    const res = await submitIdea(formData);
+    setIsLoading(false);
+    if (res?.error) {
+      setErrorMsg(res.error);
+    } else {
+      setIsOpen(false);
+      window.location.reload();
+    }
   };
 
   return (
     <>
       {/* Mobile Floating Action Button */}
       <button 
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+          setErrorMsg(null);
+        }}
         className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center z-40 hover:bg-emerald-700 transition-transform active:scale-95"
       >
         <Plus className="w-7 h-7" />
@@ -54,8 +69,19 @@ export function MobilePitchModal() {
               </div>
               
               <div className="flex-1 overflow-y-auto">
-                <form action={handleAction}>
+                <form onSubmit={handleSubmit}>
                   <div className="space-y-4 pt-6 px-6">
+                    {/* Anti-Abuse Warning Notice */}
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 leading-normal font-semibold">
+                      ⚠️ Please do not misuse this platform. Spammers' IP addresses are logged, and invalid submissions are blocked by AI automatically.
+                    </div>
+
+                    {errorMsg && (
+                      <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
+                        ❌ {errorMsg}
+                      </div>
+                    )}
+
                     <div className="space-y-3">
                       <Input 
                         name="authorName" 
@@ -79,8 +105,12 @@ export function MobilePitchModal() {
                     </div>
                   </div>
                   <div className="bg-slate-50/80 mt-6 pb-8 sm:pb-6 pt-4 px-6 border-t border-slate-100">
-                    <Button type="submit" className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-14 text-lg">
-                      Submit Pitch
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading}
+                      className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-14 text-lg"
+                    >
+                      {isLoading ? "Submitting..." : "Submit Pitch"}
                     </Button>
                   </div>
                 </form>
