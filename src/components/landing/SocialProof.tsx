@@ -92,7 +92,7 @@ export function SocialProof({ testimonials, latestIdeas, reviewsCount }: SocialP
                     {/* Footer */}
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold uppercase tracking-widest ${c.tag}`}>
-                        Anonymous Founder
+                        {idea.authorName && idea.authorName.trim() !== "" ? idea.authorName : "Anonymous Founder"}
                       </span>
                       <span className={`text-xs font-semibold ${c.tag}`} suppressHydrationWarning>
                         {new Date(idea.createdAt).toLocaleDateString()}
