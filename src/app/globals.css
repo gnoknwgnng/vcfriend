@@ -247,4 +247,14 @@ body, .bg-book-texture {
   box-shadow: 0 0 4px rgba(240,236,220,0.15);
 }
 
+/* Force all text in handwritten Caveat font to be bold for maximum legibility */
+[style*="font-caveat"],
+[style*="font-caveat"] *,
+[style*="--font-caveat"],
+[style*="--font-caveat"] *,
+.font-caveat,
+.font-caveat * {
+  font-weight: 700 !important;
+}
+
 
