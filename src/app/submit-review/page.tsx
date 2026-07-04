@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,15 +9,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { submitTestimonial } from "./actions";
 
 export default function SubmitReviewPage() {
-  const handleReviewAction = async (formData: FormData) => {
-    "use server";
-    await submitTestimonial(formData);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMsg(null);
+    const formData = new FormData(e.currentTarget);
+    const res = await submitTestimonial(formData);
+    setIsLoading(false);
+    if (res?.error) {
+      setErrorMsg(res.error);
+    }
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/10 animate-fade-in">
       <Card className="w-full max-w-2xl glass border-border/50 shadow-2xl">
-        <form action={handleReviewAction}>
+        <form onSubmit={handleSubmit}>
           <CardHeader className="space-y-1">
             <CardTitle className="text-3xl font-bold tracking-tight text-center">Write a Review</CardTitle>
             <CardDescription className="text-center text-lg">
@@ -22,6 +35,12 @@ export default function SubmitReviewPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 mt-4">
+            
+            {errorMsg && (
+              <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
+                ❌ {errorMsg}
+              </div>
+            )}
             
             <div className="space-y-2">
               <label htmlFor="authorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -71,8 +90,8 @@ export default function SubmitReviewPage() {
             <Link href="/" className={buttonVariants({ variant: "ghost", className: "w-full sm:w-auto h-12" })}>
               Cancel
             </Link>
-            <Button type="submit" className="w-full sm:w-auto text-base h-12 rounded-full font-semibold px-8">
-              Submit Review
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto text-base h-12 rounded-full font-semibold px-8">
+              {isLoading ? "Submitting..." : "Submit Review"}
             </Button>
           </CardFooter>
         </form>
