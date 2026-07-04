@@ -132,7 +132,7 @@ export default async function IdeaFeedPage() {
           </div>
 
           {/* Submit Idea Form (Desktop only) */}
-          <div id="pitch-form" className="hidden lg:block lg:col-span-1 order-2 lg:sticky lg:bottom-4 lg:self-end mt-4 lg:mt-0">
+          <div id="pitch-form" className="hidden lg:block lg:col-span-1 order-2 lg:sticky lg:top-24 lg:self-start mt-4 lg:mt-0">
             <div 
               className="relative flex flex-col p-6 rounded-sm border-2 border-slate-200 bg-white shadow-[6px_6px_24px_rgba(0,0,0,0.28)] rotate-1"
               style={{ fontFamily: "var(--font-caveat), cursive" }}
