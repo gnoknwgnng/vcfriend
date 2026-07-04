@@ -2,6 +2,68 @@
 
 import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+
+async function moderatePitchWithAI(content: string): Promise<{ isSpam: boolean; reason?: string }> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    console.warn("GROQ_API_KEY is not configured. Skipping AI moderation.");
+    return { isSpam: false };
+  }
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI content moderator for 'VC Friend', a startup pitching platform.
+Your task is to analyze the text and determine if it is a legitimate startup pitch or if it is spam/advertisement/malicious content/gibberish.
+
+Criteria for a legitimate pitch:
+- Explains a business idea, product, service, startup, or problem they want to solve.
+- E.g. "I am building X to solve Y..." or "Looking for feedback on a SaaS tool that..."
+
+Criteria for SPAM (isSpam = true):
+- General chat, testing, gibberish (e.g. "asdf", "hello test", "123").
+- Direct advertisements for WhatsApp groups, Telegram channels, marketing agencies, or unrelated services (e.g., "Get free leads, WhatsApp me at X...").
+- Off-topic rants, spam links, insults, or harassment.
+
+Respond ONLY with a JSON object in this format:
+{
+  "isSpam": true/false,
+  "reason": "Brief explanation of why it was classified as spam (only if isSpam is true)"
+}`
+          },
+          {
+            role: "user",
+            content: content
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.1,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Groq API error:", await response.text());
+      return { isSpam: false };
+    }
+
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content);
+    return result;
+  } catch (error) {
+    console.error("Error in AI moderation:", error);
+    return { isSpam: false };
+  }
+}
 
 export async function submitIdea(formData: FormData) {
   const content = formData.get("content") as string;
@@ -12,12 +74,41 @@ export async function submitIdea(formData: FormData) {
     return { error: "Idea content cannot be empty." };
   }
 
+  // 1. Enforce IP Rate Limiting (Max 2 lifetime submissions)
+  let ip = "127.0.0.1";
+  try {
+    const headersList = await headers();
+    const rawIp = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
+    ip = rawIp.split(",")[0].trim();
+  } catch (e) {
+    console.error("Failed to parse headers/IP:", e);
+  }
+
+  // Count existing submissions from this IP
+  const { count, error: countError } = await supabase
+    .from("IdeaPitch")
+    .select("*", { count: "exact", head: true })
+    .eq("ipAddress", ip);
+
+  if (countError) {
+    console.error("Error checking IP submission count:", countError);
+  } else if (count && count >= 2) {
+    return { error: "You have reached the maximum limit of 2 pitches per device/IP address." };
+  }
+
+  // 2. Enforce AI Moderation (Groq Cloud)
+  const moderation = await moderatePitchWithAI(content);
+  if (moderation.isSpam) {
+    return { error: `Submission blocked by AI: ${moderation.reason || "Content does not look like a startup pitch."}` };
+  }
+
   const { data, error } = await supabase
     .from("IdeaPitch")
     .insert([{ 
       content, 
       authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-      contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null
+      contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
+      ipAddress: ip
     }])
     .select()
     .single();

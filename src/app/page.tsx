@@ -32,7 +32,7 @@ export default async function Home({
   // Fetch latest ideas
   const { data: latestIdeas } = await supabase
     .from("IdeaPitch")
-    .select("*")
+    .select("id, authorName, content, createdAt, contactInfo")
     .order("createdAt", { ascending: false })
     .limit(3);
 

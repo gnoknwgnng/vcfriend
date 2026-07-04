@@ -18,7 +18,7 @@ export default async function IdeaThreadPage({
   // Fetch the idea
   const { data: idea, error: ideaError } = await supabase
     .from("IdeaPitch")
-    .select("*")
+    .select("id, authorName, content, createdAt, contactInfo")
     .eq("id", id)
     .single();
 

@@ -17,7 +17,7 @@ export default async function IdeaFeedPage() {
   // Fetch ideas from Supabase
   const { data: ideas, error } = await supabase
     .from("IdeaPitch")
-    .select("*")
+    .select("id, authorName, content, createdAt, contactInfo")
     .order("createdAt", { ascending: false })
     .limit(100);
 
