@@ -32,6 +32,12 @@ export function Navbar() {
 
         {/* Right Nav */}
         <div className="flex items-center gap-4">
+          <Link
+            href="/submit-review"
+            className="inline-flex items-center gap-1.5 text-[13px] md:text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors chalk-text border border-emerald-500/30 px-2.5 py-1.5 rounded-sm bg-emerald-900/30 hover:bg-emerald-900/50 shadow-sm"
+          >
+            ✏️ <span className="hidden sm:inline">Write a Platform Review</span><span className="sm:hidden">Write a Review</span>
+          </Link>
         </div>
       </div>
     </header>
