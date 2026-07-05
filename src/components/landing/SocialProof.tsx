@@ -49,6 +49,7 @@ export function SocialProof({ testimonials, latestIdeas, reviewsCount }: SocialP
                   { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "-rotate-[0.6deg]" },
                 ];
                 const c = PITCH_COLORS[index % PITCH_COLORS.length];
+                const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
                 return (
                   <motion.div
                     key={idea.id}
@@ -65,6 +66,12 @@ export function SocialProof({ testimonials, latestIdeas, reviewsCount }: SocialP
                     `}
                     style={{ fontFamily: "var(--font-caveat), cursive", willChange: "transform" }}
                   >
+                    {/* VC Reviewed Badge */}
+                    {hasVCReview && (
+                      <div className="absolute top-2 right-3 bg-rose-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-sm z-20">
+                        🔥 VC Reviewed
+                      </div>
+                    )}
                     {/* Pin */}
                     <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full ${c.pin} shadow-md border-2 border-white/80 z-10`} />
                     {/* Tape */}

@@ -13,7 +13,7 @@ export default async function IdeaFeedPage() {
   // Fetch ideas from Supabase
   const { data: ideas, error } = await supabase
     .from("IdeaPitch")
-    .select("id, authorName, content, createdAt, contactInfo")
+    .select("id, authorName, content, createdAt, contactInfo, IdeaComment(isVC)")
     .order("createdAt", { ascending: false })
     .limit(100);
 
@@ -60,6 +60,7 @@ export default async function IdeaFeedPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {ideas.map((idea, index) => {
                   const c = PITCH_COLORS[index % PITCH_COLORS.length];
+                  const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
                   return (
                     <div 
                       key={idea.id}
@@ -71,6 +72,12 @@ export default async function IdeaFeedPage() {
                       `}
                       style={{ fontFamily: "var(--font-caveat), cursive", willChange: "transform" }}
                     >
+                      {/* VC Reviewed Badge */}
+                      {hasVCReview && (
+                        <div className="absolute top-2 right-3 bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-sm z-20">
+                          🔥 VC Reviewed
+                        </div>
+                      )}
                       {/* Pin */}
                       <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full ${c.pin} shadow-md border-2 border-white/80 z-10`} />
                       {/* Tape */}

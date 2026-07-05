@@ -158,12 +158,83 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
     return { error: "Comment content cannot be empty." };
   }
 
+  const trimmedContent = content.trim();
+
+  // 1. Duplicate check (prevent identical comments on the same pitch thread)
+  const { data: existingComments, error: dupError } = await supabase
+    .from("IdeaComment")
+    .select("id")
+    .eq("ideaId", ideaId)
+    .eq("content", trimmedContent)
+    .limit(1);
+
+  if (dupError) {
+    console.error("Error checking duplicate comment:", dupError);
+  } else if (existingComments && existingComments.length > 0) {
+    return { error: "This feedback/comment has already been posted on this pitch." };
+  }
+
+  // 2. IP Rate Limit for public comments (max 3 comments per IP per pitch thread)
+  let ip = "127.0.0.1";
+  try {
+    const headersList = await headers();
+    const rawIp = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
+    ip = rawIp.split(",")[0].trim();
+  } catch (e) {
+    console.error("Failed to parse headers/IP for comment:", e);
+  }
+
+  const { count, error: countError } = await supabase
+    .from("IdeaComment")
+    .select("*", { count: "exact", head: true })
+    .eq("ideaId", ideaId)
+    .eq("ipAddress", ip);
+
+  if (countError) {
+    console.error("Error checking IP comment count:", countError);
+  } else if (count && count >= 3) {
+    // Save to Spams table (fails silently if table is not created yet)
+    try {
+      await supabase
+        .from("Spams")
+        .insert([{ 
+          content: trimmedContent, 
+          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+          ipAddress: ip,
+          flaggedReason: "IP Rate Limit Exceeded (Max 3 comments per pitch)"
+        }]);
+    } catch (err) {
+      console.error("Failed to log comment rate limit:", err);
+    }
+    return { error: "You have reached the maximum limit of 3 replies/feedbacks per pitch." };
+  }
+
+  // 3. AI Moderation Check (Groq Cloud)
+  const moderation = await moderatePitchWithAI(trimmedContent);
+  if (moderation.isSpam) {
+    // Save to Spams table (fails silently if table is not created yet)
+    try {
+      await supabase
+        .from("Spams")
+        .insert([{ 
+          content: trimmedContent, 
+          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+          ipAddress: ip,
+          flaggedReason: `AI Moderation Blocked Comment: ${moderation.reason || "gibberish or promotional content"}`
+        }]);
+    } catch (err) {
+      console.error("Failed to log comment AI block:", err);
+    }
+    return { error: `Comment blocked by AI: ${moderation.reason || "Content does not look like a startup feedback."}` };
+  }
+
   const { data, error } = await supabase
     .from("IdeaComment")
     .insert([{ 
       ideaId,
-      content, 
-      authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder" 
+      content: trimmedContent, 
+      authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+      ipAddress: ip
     }])
     .select()
     .single();
@@ -171,6 +242,48 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
   if (error) {
     console.error("Error submitting comment:", error);
     return { error: "Failed to submit comment. Please try again." };
+  }
+
+  revalidatePath(`/ideas/${ideaId}`);
+  return { success: true, comment: data };
+}
+
+export async function submitVCComment(ideaId: string, vcId: string, passcode: string, content: string) {
+  if (passcode !== "vcfriend") {
+    return { error: "Invalid investor passcode." };
+  }
+
+  if (!content || content.trim() === "") {
+    return { error: "Review content cannot be empty." };
+  }
+
+  // Fetch VC Name
+  const { data: vc, error: vcError } = await supabase
+    .from("VC")
+    .select("name")
+    .eq("id", vcId)
+    .single();
+
+  if (vcError || !vc) {
+    console.error("Error fetching VC:", vcError);
+    return { error: "Failed to verify VC Firm details." };
+  }
+
+  const { data, error } = await supabase
+    .from("IdeaComment")
+    .insert([{
+      ideaId,
+      content: content.trim(),
+      authorName: `${vc.name} (Partner)`,
+      isVC: true,
+      vcId: vcId
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error submitting VC comment:", error);
+    return { error: "Failed to post VC review. Please try again." };
   }
 
   revalidatePath(`/ideas/${ideaId}`);
