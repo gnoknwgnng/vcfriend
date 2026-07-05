@@ -248,11 +248,7 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
   return { success: true, comment: data };
 }
 
-export async function submitVCComment(ideaId: string, vcId: string, passcode: string, content: string) {
-  if (passcode !== "vcfriend") {
-    return { error: "Invalid investor passcode." };
-  }
-
+export async function submitVCComment(ideaId: string, vcId: string, content: string) {
   if (!content || content.trim() === "") {
     return { error: "Review content cannot be empty." };
   }
