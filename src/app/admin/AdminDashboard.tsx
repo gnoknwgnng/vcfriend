@@ -107,7 +107,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
               type="password"
               value={inputPasscode}
               onChange={(e) => setInputPasscode(e.target.value)}
-              placeholder="Enter passcode (e.g. vcfriend)"
+              placeholder="Enter passcode"
               className="flex h-12 w-full rounded-sm border border-emerald-500/20 bg-emerald-950/40 text-emerald-100 px-3 py-2 text-center text-lg focus:outline-none focus:ring-1 focus:ring-emerald-400 placeholder-emerald-200/25"
               required
             />
