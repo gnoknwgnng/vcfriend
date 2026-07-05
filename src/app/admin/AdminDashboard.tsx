@@ -20,16 +20,37 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
   const [vcName, setVcName] = useState<string>("");
   const [activeReviews, setActiveReviews] = useState<{ [ideaId: string]: string }>({});
   const [reviewStatus, setReviewStatus] = useState<{ [ideaId: string]: { loading: boolean; error?: string; success?: boolean } }>({});
+  
+  // Passcode gate state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [inputPasscode, setInputPasscode] = useState<string>("");
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // Restore VC Name from localStorage
+  // Restore VC Name and auth state
   useEffect(() => {
     const savedVcName = localStorage.getItem("vc_admin_name");
     if (savedVcName) setVcName(savedVcName);
+
+    const isUnlocked = sessionStorage.getItem("admin_portal_unlocked") === "true";
+    if (isUnlocked) {
+      setIsAuthenticated(true);
+    }
   }, []);
 
   const handleVcNameChange = (name: string) => {
     setVcName(name);
     localStorage.setItem("vc_admin_name", name);
+  };
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputPasscode === "vcfriend") {
+      setIsAuthenticated(true);
+      sessionStorage.setItem("admin_portal_unlocked", "true");
+      setAuthError(null);
+    } else {
+      setAuthError("Incorrect passcode. Please try again.");
+    }
   };
 
   const handleReviewSubmit = async (ideaId: string) => {
@@ -68,6 +89,50 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
       }, 3000);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-6 glass border border-emerald-500/20 p-8 rounded-sm shadow-2xl animate-fade-in text-center">
+          <div>
+            <h2 className="chalk-heading text-4xl font-bold text-emerald-200 mb-2">
+              Portal Locked
+            </h2>
+            <p className="chalk-text text-emerald-100/60 text-sm">
+              Please enter the investor passcode to access the Admin Portal.
+            </p>
+          </div>
+          <form onSubmit={handleUnlock} className="mt-8 space-y-4">
+            <input
+              type="password"
+              value={inputPasscode}
+              onChange={(e) => setInputPasscode(e.target.value)}
+              placeholder="Enter passcode (e.g. vcfriend)"
+              className="flex h-12 w-full rounded-sm border border-emerald-500/20 bg-emerald-950/40 text-emerald-100 px-3 py-2 text-center text-lg focus:outline-none focus:ring-1 focus:ring-emerald-400 placeholder-emerald-200/25"
+              required
+            />
+            {authError && (
+              <p className="text-rose-400 text-sm font-semibold">{authError}</p>
+            )}
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center px-4 h-12 rounded-sm bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-[3px_3px_0px_rgba(0,0,0,0.15)] hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Unlock Portal
+            </button>
+          </form>
+          <div className="mt-4 pt-4 border-t border-emerald-500/10">
+            <Link 
+              href="/" 
+              className="text-sm font-semibold text-emerald-300 hover:text-emerald-200 underline"
+            >
+              Back to Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl animate-fade-in">
