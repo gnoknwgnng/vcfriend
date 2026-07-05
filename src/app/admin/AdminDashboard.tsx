@@ -72,27 +72,35 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl animate-fade-in">
       
-      {/* Page Header */}
-      <div className="border-b border-emerald-500/20 pb-6 mb-8">
-        <Link 
-          href="/" 
-          className="inline-flex items-center text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors mb-2"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
-        </Link>
-        <h1 className="chalk-heading text-4xl md:text-5xl font-bold tracking-tight text-emerald-200">
-          Investor Admin Portal
-        </h1>
-        <p className="chalk-text text-[15px] text-emerald-100/70 mt-1">
-          Review startup ideas, give professional feedback, and highlight them on the platform.
-        </p>
+      {/* Page Header - Wrapped in blocks to avoid inline overlapping */}
+      <div className="border-b border-emerald-500/20 pb-6 mb-8 flex flex-col gap-3">
+        <div>
+          <Link 
+            href="/" 
+            className="inline-flex items-center text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
+          </Link>
+        </div>
+        <div>
+          <h1 className="chalk-heading text-4xl md:text-5xl font-bold tracking-tight text-emerald-200 block">
+            Investor Admin Portal
+          </h1>
+        </div>
+        <div>
+          <p className="chalk-text text-[15px] text-emerald-100/70 block">
+            Review startup ideas, give professional feedback, and highlight them on the platform.
+          </p>
+        </div>
       </div>
 
       {/* Grid of Pitches */}
       <div className="space-y-6">
-        <h2 className="chalk-heading text-2xl font-bold tracking-tight text-emerald-200">
-          Recent Startup Pitches ({ideas.length})
-        </h2>
+        <div>
+          <h2 className="chalk-heading text-2xl font-bold tracking-tight text-emerald-200">
+            Recent Startup Pitches ({ideas.length})
+          </h2>
+        </div>
 
         {ideas.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-emerald-500/20 rounded-sm bg-emerald-950/10">
@@ -115,7 +123,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                   <div className="flex items-center justify-between border-b-2 border-dashed border-slate-100 pb-3 mb-4">
                     <div>
                       <span className="font-bold text-lg text-slate-900">{idea.authorName || "Anonymous Founder"}</span>
-                      <span className="text-[12px] font-semibold text-slate-500 ml-2">
+                      <span className="text-[12px] font-semibold text-slate-500 ml-2 animate-pulse">
                         {new Date(idea.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -129,37 +137,41 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                   </div>
 
                   {/* Pitch Content */}
-                  <p className="text-slate-800 text-[15px] leading-relaxed mb-6 font-bold flex-grow">
+                  <p className="text-slate-800 text-[16px] leading-relaxed mb-6 font-bold flex-grow">
                     {idea.content}
                   </p>
 
-                  {/* VC Review Editor */}
-                  <div className="pt-4 border-t-2 border-dashed border-slate-100 space-y-3 mt-auto">
-                    <div className="flex items-center gap-1 text-slate-500">
+                  {/* VC Review Editor - Redesigned with chalkboard handwritten styles */}
+                  <div className="pt-4 border-t-2 border-dashed border-slate-100 space-y-4 mt-auto">
+                    <div className="flex items-center gap-1.5 text-slate-600">
                       <Award className="w-4 h-4 text-emerald-600" />
-                      <span className="text-[11px] font-bold uppercase tracking-wider">
+                      <span className="text-[12px] font-bold uppercase tracking-wider">
                         Post Verified VC Feedback
                       </span>
                     </div>
 
                     {/* VC Firm Name Input */}
-                    <input 
-                      type="text"
-                      value={vcName}
-                      onChange={(e) => handleVcNameChange(e.target.value)}
-                      placeholder="Your VC Firm Name (e.g. Sequoia Capital)"
-                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-3 py-2 text-sm font-semibold focus:outline-none focus:border-slate-400 rounded-sm"
-                      required
-                    />
+                    <div className="space-y-1">
+                      <input 
+                        type="text"
+                        value={vcName}
+                        onChange={(e) => handleVcNameChange(e.target.value)}
+                        placeholder="Your VC Firm Name (e.g. Sequoia Capital)"
+                        className="w-full bg-transparent border-b-2 border-dashed border-slate-300 focus:border-slate-500 placeholder-slate-400 text-slate-900 text-base font-bold px-1 py-1.5 focus:outline-none"
+                        required
+                      />
+                    </div>
 
                     {/* Feedback Content */}
-                    <textarea
-                      value={activeReviews[idea.id] || ""}
-                      onChange={(e) => setActiveReviews(prev => ({ ...prev, [idea.id]: e.target.value }))}
-                      placeholder="Enter professional feedback to highlight this pitch..."
-                      className="w-full min-h-[90px] bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 p-3 text-[14px] font-semibold focus:outline-none focus:border-slate-400 resize-none rounded-sm"
-                      required
-                    />
+                    <div className="space-y-1">
+                      <textarea
+                        value={activeReviews[idea.id] || ""}
+                        onChange={(e) => setActiveReviews(prev => ({ ...prev, [idea.id]: e.target.value }))}
+                        placeholder="Enter professional feedback to highlight this pitch..."
+                        className="w-full min-h-[90px] bg-transparent border-2 border-dashed border-slate-200 focus:border-slate-400 placeholder-slate-400 text-slate-900 text-base font-bold p-2.5 focus:outline-none resize-none rounded-sm"
+                        required
+                      />
+                    </div>
 
                     {/* Status Alerts */}
                     {reviewState.error && (
@@ -176,7 +188,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                     <button
                       onClick={() => handleReviewSubmit(idea.id)}
                       disabled={reviewState.loading}
-                      className="w-full inline-flex items-center justify-center px-4 h-10 rounded-sm border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transition-all disabled:opacity-50"
+                      className="w-full mt-2 inline-flex items-center justify-center px-4 h-11 rounded-sm border-2 border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-base shadow-[3px_3px_0px_rgba(0,0,0,0.15)] hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                     >
                       {reviewState.loading ? "Posting..." : "Post Highlighted Review"}
                     </button>
