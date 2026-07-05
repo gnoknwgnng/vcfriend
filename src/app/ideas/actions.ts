@@ -248,21 +248,13 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
   return { success: true, comment: data };
 }
 
-export async function submitVCComment(ideaId: string, vcId: string, content: string) {
-  if (!content || content.trim() === "") {
-    return { error: "Review content cannot be empty." };
+export async function submitVCComment(ideaId: string, vcName: string, content: string) {
+  if (!vcName || vcName.trim() === "") {
+    return { error: "VC Firm name cannot be empty." };
   }
 
-  // Fetch VC Name
-  const { data: vc, error: vcError } = await supabase
-    .from("VC")
-    .select("name")
-    .eq("id", vcId)
-    .single();
-
-  if (vcError || !vc) {
-    console.error("Error fetching VC:", vcError);
-    return { error: "Failed to verify VC Firm details." };
+  if (!content || content.trim() === "") {
+    return { error: "Review content cannot be empty." };
   }
 
   const { data, error } = await supabase
@@ -270,9 +262,8 @@ export async function submitVCComment(ideaId: string, vcId: string, content: str
     .insert([{
       ideaId,
       content: content.trim(),
-      authorName: `${vc.name} (Partner)`,
-      isVC: true,
-      vcId: vcId
+      authorName: `${vcName.trim()} (Investor)`,
+      isVC: true
     }])
     .select()
     .single();

@@ -5,11 +5,6 @@ import { submitVCComment } from "../ideas/actions";
 import { ChevronLeft, Award } from "lucide-react";
 import Link from "next/link";
 
-interface VC {
-  id: string;
-  name: string;
-}
-
 interface Idea {
   id: string;
   authorName: string;
@@ -18,30 +13,29 @@ interface Idea {
 }
 
 interface AdminDashboardProps {
-  vcs: VC[];
   ideas: Idea[];
 }
 
-export function AdminDashboard({ vcs, ideas }: AdminDashboardProps) {
-  const [selectedVcId, setSelectedVcId] = useState<string>("");
+export function AdminDashboard({ ideas }: AdminDashboardProps) {
+  const [vcName, setVcName] = useState<string>("");
   const [activeReviews, setActiveReviews] = useState<{ [ideaId: string]: string }>({});
   const [reviewStatus, setReviewStatus] = useState<{ [ideaId: string]: { loading: boolean; error?: string; success?: boolean } }>({});
 
-  // Restore selected VC from localStorage if present
+  // Restore VC Name from localStorage
   useEffect(() => {
-    const savedVcId = localStorage.getItem("vc_admin_id");
-    if (savedVcId) setSelectedVcId(savedVcId);
+    const savedVcName = localStorage.getItem("vc_admin_name");
+    if (savedVcName) setVcName(savedVcName);
   }, []);
 
-  const handleVcSelect = (vcId: string) => {
-    setSelectedVcId(vcId);
-    localStorage.setItem("vc_admin_id", vcId);
+  const handleVcNameChange = (name: string) => {
+    setVcName(name);
+    localStorage.setItem("vc_admin_name", name);
   };
 
   const handleReviewSubmit = async (ideaId: string) => {
     const content = activeReviews[ideaId];
-    if (!selectedVcId) {
-      alert("Please select your VC Firm first at the top of the page.");
+    if (!vcName || vcName.trim() === "") {
+      alert("Please enter your VC Firm Name on the card.");
       return;
     }
     if (!content || content.trim() === "") {
@@ -51,7 +45,7 @@ export function AdminDashboard({ vcs, ideas }: AdminDashboardProps) {
 
     setReviewStatus(prev => ({ ...prev, [ideaId]: { loading: true } }));
 
-    const res = await submitVCComment(ideaId, selectedVcId, content);
+    const res = await submitVCComment(ideaId, vcName, content);
 
     if (res?.error) {
       setReviewStatus(prev => ({
@@ -78,55 +72,27 @@ export function AdminDashboard({ vcs, ideas }: AdminDashboardProps) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl animate-fade-in">
       
-      {/* Header bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-emerald-500/20 pb-6 mb-8">
-        <div>
-          <Link 
-            href="/" 
-            className="inline-flex items-center text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors mb-2"
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
-          </Link>
-          <h1 className="chalk-heading text-4xl md:text-5xl font-bold tracking-tight text-emerald-200">
-            Investor Admin Portal
-          </h1>
-          <p className="chalk-text text-[15px] text-emerald-100/70 mt-1">
-            Review startup ideas to post verified investor feedback and highlight them on the platform.
-          </p>
-        </div>
-
-        {/* Firm Select Banner */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-emerald-950/40 border border-emerald-500/25 p-4 rounded-sm shadow-sm w-full md:w-auto max-w-md">
-          <div className="text-sm font-bold text-emerald-200 shrink-0">
-            Publish reviews on behalf of:
-          </div>
-          <select
-            value={selectedVcId}
-            onChange={(e) => handleVcSelect(e.target.value)}
-            className="flex h-10 w-full sm:w-60 rounded-sm border border-emerald-500/20 bg-emerald-900/30 text-emerald-100 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400 font-bold"
-          >
-            <option value="" className="bg-emerald-950 text-emerald-100">-- Select VC Firm --</option>
-            {vcs.map((vc) => (
-              <option key={vc.id} value={vc.id} className="bg-emerald-950 text-emerald-100">
-                {vc.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Page Header */}
+      <div className="border-b border-emerald-500/20 pb-6 mb-8">
+        <Link 
+          href="/" 
+          className="inline-flex items-center text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors mb-2"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
+        </Link>
+        <h1 className="chalk-heading text-4xl md:text-5xl font-bold tracking-tight text-emerald-200">
+          Investor Admin Portal
+        </h1>
+        <p className="chalk-text text-[15px] text-emerald-100/70 mt-1">
+          Review startup ideas, give professional feedback, and highlight them on the platform.
+        </p>
       </div>
 
-      {/* Full Screen Grid Layout */}
+      {/* Grid of Pitches */}
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="chalk-heading text-2xl font-bold tracking-tight text-emerald-200">
-            Recent Startup Pitches ({ideas.length})
-          </h2>
-          {!selectedVcId && (
-            <span className="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-200 border border-amber-500/30 rounded-sm animate-pulse">
-              ⚠️ Please select your VC Firm above to write reviews
-            </span>
-          )}
-        </div>
+        <h2 className="chalk-heading text-2xl font-bold tracking-tight text-emerald-200">
+          Recent Startup Pitches ({ideas.length})
+        </h2>
 
         {ideas.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-emerald-500/20 rounded-sm bg-emerald-950/10">
@@ -175,12 +141,24 @@ export function AdminDashboard({ vcs, ideas }: AdminDashboardProps) {
                         Post Verified VC Feedback
                       </span>
                     </div>
+
+                    {/* VC Firm Name Input */}
+                    <input 
+                      type="text"
+                      value={vcName}
+                      onChange={(e) => handleVcNameChange(e.target.value)}
+                      placeholder="Your VC Firm Name (e.g. Sequoia Capital)"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-3 py-2 text-sm font-semibold focus:outline-none focus:border-slate-400 rounded-sm"
+                      required
+                    />
+
+                    {/* Feedback Content */}
                     <textarea
                       value={activeReviews[idea.id] || ""}
                       onChange={(e) => setActiveReviews(prev => ({ ...prev, [idea.id]: e.target.value }))}
-                      placeholder={selectedVcId ? "Enter feedback to highlight this pitch..." : "Select VC Firm at the top to write feedback..."}
-                      disabled={!selectedVcId}
-                      className="w-full min-h-[90px] bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 p-3 text-[14px] font-semibold focus:outline-none focus:border-slate-400 resize-none rounded-sm disabled:opacity-60"
+                      placeholder="Enter professional feedback to highlight this pitch..."
+                      className="w-full min-h-[90px] bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 p-3 text-[14px] font-semibold focus:outline-none focus:border-slate-400 resize-none rounded-sm"
+                      required
                     />
 
                     {/* Status Alerts */}
@@ -197,7 +175,7 @@ export function AdminDashboard({ vcs, ideas }: AdminDashboardProps) {
 
                     <button
                       onClick={() => handleReviewSubmit(idea.id)}
-                      disabled={reviewState.loading || !selectedVcId}
+                      disabled={reviewState.loading}
                       className="w-full inline-flex items-center justify-center px-4 h-10 rounded-sm border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transition-all disabled:opacity-50"
                     >
                       {reviewState.loading ? "Posting..." : "Post Highlighted Review"}
