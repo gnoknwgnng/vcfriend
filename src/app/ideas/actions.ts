@@ -166,18 +166,17 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
 
   const trimmedContent = content.trim();
 
-  // 1. Duplicate check (prevent identical comments on the same pitch thread)
+  // 1. Duplicate check (prevent identical comments globally across the entire platform)
   const { data: existingComments, error: dupError } = await supabase
     .from("IdeaComment")
     .select("id")
-    .eq("ideaId", ideaId)
     .eq("content", trimmedContent)
     .limit(1);
 
   if (dupError) {
     console.error("Error checking duplicate comment:", dupError);
   } else if (existingComments && existingComments.length > 0) {
-    return { error: "This feedback/comment has already been posted on this pitch." };
+    return { error: "This feedback/comment has already been posted on the platform." };
   }
 
   // 2. IP Rate Limit for public comments (max 3 comments per IP per pitch thread)
