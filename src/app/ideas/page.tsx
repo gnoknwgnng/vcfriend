@@ -8,18 +8,31 @@ import { DesktopPitchForm } from "./DesktopPitchForm";
 
 export const revalidate = 0; // Dynamic route
 
-export default async function IdeaFeedPage() {
+export default async function IdeaFeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams;
+  const pageStr = params?.page as string;
+  const page = parseInt(pageStr) || 1;
+  const limit = 12; // Snappy feed page limit
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
 
   // Fetch ideas from Supabase
-  const { data: ideas, error } = await supabase
+  const { data: ideas, error, count } = await supabase
     .from("IdeaPitch")
-    .select("id, authorName, content, createdAt, contactInfo, IdeaComment(isVC)")
+    .select("id, authorName, content, createdAt, contactInfo, IdeaComment(isVC)", { count: 'exact' })
     .order("createdAt", { ascending: false })
-    .limit(100);
+    .range(start, end);
 
   if (error) {
     console.error("Error fetching ideas:", error);
   }
+
+  const totalCount = count || 0;
+  const totalPages = Math.ceil(totalCount / limit);
 
   const PITCH_COLORS = [
     { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "-rotate-[0.5deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
@@ -130,6 +143,37 @@ export default async function IdeaFeedPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-6 mt-12 pt-6 border-t border-emerald-500/20" style={{ fontFamily: "var(--font-caveat), cursive" }}>
+                {page > 1 ? (
+                  <Link 
+                    href={`/ideas?page=${page - 1}`}
+                    className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 font-bold text-lg"
+                  >
+                    Previous
+                  </Link>
+                ) : (
+                  <span className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-500/10 text-emerald-500/40 font-bold text-lg cursor-not-allowed">Previous</span>
+                )}
+                
+                <span className="text-xl font-bold chalk-text">
+                  Page {page} of {totalPages}
+                </span>
+
+                {page < totalPages ? (
+                  <Link 
+                    href={`/ideas?page=${page + 1}`}
+                    className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 font-bold text-lg"
+                  >
+                    Next
+                  </Link>
+                ) : (
+                  <span className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-500/10 text-emerald-500/40 font-bold text-lg cursor-not-allowed">Next</span>
+                )}
               </div>
             )}
           </div>

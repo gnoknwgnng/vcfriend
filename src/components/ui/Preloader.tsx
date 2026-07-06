@@ -17,7 +17,7 @@ export function Preloader() {
 
     // Animate count from 0 to 100
     let start = 0;
-    const duration = 3500; // ms — longer loading feel
+    const duration = 800; // ms — snappy loading feel
     const steps = 80;
     const increment = 100 / steps;
     const interval = duration / steps;
@@ -30,7 +30,7 @@ export function Preloader() {
         setTimeout(() => {
           setIsLoading(false);
           sessionStorage.setItem("vc-friend-loaded", "true");
-        }, 900); // hold at 100% longer before sliding away
+        }, 150); // snappier hold before sliding away
       } else {
         setCount(Math.floor(start));
       }

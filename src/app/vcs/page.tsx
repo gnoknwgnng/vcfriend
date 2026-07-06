@@ -14,7 +14,7 @@ export default async function VCDirectory({
   const pageStr = params?.page as string;
   
   const page = parseInt(pageStr) || 1;
-  const limit = 50;
+  const limit = 18; // Multi-column grid optimized limit
   const start = (page - 1) * limit;
   const end = start + limit - 1;
 
