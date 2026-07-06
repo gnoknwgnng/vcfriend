@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Bell, BellOff, CheckCircle, Loader2 } from "lucide-react";
 import { savePushSubscription } from "./push-actions";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-
 type Status = "idle" | "loading" | "success" | "denied" | "error" | "unsupported";
 
 export function NotificationOptIn() {
@@ -14,6 +12,8 @@ export function NotificationOptIn() {
   const [message, setMessage] = useState("");
 
   const handleEnable = async () => {
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
     if (!nameOrPhone.trim()) {
       setStatus("error");
       setMessage("Please enter your name or phone number from your pitch submission.");
@@ -31,9 +31,9 @@ export function NotificationOptIn() {
 
     try {
       // 1. Check VAPID key is available (must be set in env)
-      if (!VAPID_PUBLIC_KEY) {
+      if (!vapidKey) {
         setStatus("error");
-        setMessage("Push notifications are not configured on this server yet. Please try again later.");
+        setMessage("Push notifications are not configured on this server yet (VAPID key is missing). Please try again later.");
         return;
       }
 
@@ -52,7 +52,7 @@ export function NotificationOptIn() {
       // 4. Subscribe to push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
       const subJson = subscription.toJSON();
