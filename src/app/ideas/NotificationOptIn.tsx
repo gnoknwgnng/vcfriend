@@ -30,7 +30,14 @@ export function NotificationOptIn() {
     setMessage("");
 
     try {
-      // 1. Ask for browser notification permission
+      // 1. Check VAPID key is available (must be set in env)
+      if (!VAPID_PUBLIC_KEY) {
+        setStatus("error");
+        setMessage("Push notifications are not configured on this server yet. Please try again later.");
+        return;
+      }
+
+      // 2. Ask for browser notification permission
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         setStatus("denied");
@@ -38,11 +45,11 @@ export function NotificationOptIn() {
         return;
       }
 
-      // 2. Register the service worker
+      // 3. Register the service worker
       const registration = await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
 
-      // 3. Subscribe to push
+      // 4. Subscribe to push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -51,7 +58,7 @@ export function NotificationOptIn() {
       const subJson = subscription.toJSON();
       const keys = subJson.keys as { p256dh: string; auth: string };
 
-      // 4. Save subscription to DB linked to their pitch
+      // 5. Save subscription to DB linked to their pitch
       const result = await savePushSubscription(nameOrPhone.trim(), {
         endpoint: subscription.endpoint,
         p256dh: keys.p256dh,
@@ -68,10 +75,11 @@ export function NotificationOptIn() {
       setMessage(
         `✅ Done! We found ${result.pitchCount} pitch${result.pitchCount !== 1 ? "es" : ""} under "${nameOrPhone.trim()}". You'll get notified when you receive feedback!`
       );
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Push subscription error:", err);
+      const errMsg = err instanceof Error ? err.message : String(err);
       setStatus("error");
-      setMessage("Something went wrong. Please try again.");
+      setMessage(`Error: ${errMsg}`);
     }
   };
 
