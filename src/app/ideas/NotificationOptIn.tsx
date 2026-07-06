@@ -9,14 +9,14 @@ const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 type Status = "idle" | "loading" | "success" | "denied" | "error" | "unsupported";
 
 export function NotificationOptIn() {
-  const [name, setName] = useState("");
+  const [nameOrPhone, setNameOrPhone] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
   const handleEnable = async () => {
-    if (!name.trim()) {
+    if (!nameOrPhone.trim()) {
       setStatus("error");
-      setMessage("Please enter the name you used when submitting your pitch.");
+      setMessage("Please enter your name or phone number from your pitch submission.");
       return;
     }
 
@@ -52,7 +52,7 @@ export function NotificationOptIn() {
       const keys = subJson.keys as { p256dh: string; auth: string };
 
       // 4. Save subscription to DB linked to their pitch
-      const result = await savePushSubscription(name.trim(), {
+      const result = await savePushSubscription(nameOrPhone.trim(), {
         endpoint: subscription.endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
@@ -66,7 +66,7 @@ export function NotificationOptIn() {
 
       setStatus("success");
       setMessage(
-        `✅ Done! We found ${result.pitchCount} pitch${result.pitchCount !== 1 ? "es" : ""} under "${name.trim()}". You'll get notified when you receive feedback!`
+        `✅ Done! We found ${result.pitchCount} pitch${result.pitchCount !== 1 ? "es" : ""} under "${nameOrPhone.trim()}". You'll get notified when you receive feedback!`
       );
     } catch (err) {
       console.error("Push subscription error:", err);
@@ -98,9 +98,9 @@ export function NotificationOptIn() {
           <div className="flex gap-2">
             <input
               type="text"
-              value={name}
-              onChange={(e) => { setName(e.target.value); setStatus("idle"); setMessage(""); }}
-              placeholder="Enter your name (as submitted)"
+              value={nameOrPhone}
+              onChange={(e) => { setNameOrPhone(e.target.value); setStatus("idle"); setMessage(""); }}
+              placeholder="Your name or phone number"
               className="flex-1 bg-white border-b-2 border-dashed border-emerald-300 focus:border-emerald-500 placeholder-emerald-400/70 text-slate-900 text-sm font-semibold px-2 py-1.5 focus:outline-none rounded-none"
               disabled={status === "loading"}
               onKeyDown={(e) => e.key === "Enter" && handleEnable()}

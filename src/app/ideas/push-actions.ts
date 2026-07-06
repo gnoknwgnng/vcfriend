@@ -16,21 +16,23 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
  * Returns the ideaIds that were matched.
  */
 export async function savePushSubscription(
-  authorName: string,
+  nameOrPhone: string,
   subscription: { endpoint: string; p256dh: string; auth: string }
 ) {
-  if (!authorName || authorName.trim() === "") {
-    return { error: "Please enter your name to link your pitch." };
+  if (!nameOrPhone || nameOrPhone.trim() === "") {
+    return { error: "Please enter your name or phone number used when submitting your pitch." };
   }
 
-  // Find pitches by this author name (case-insensitive)
+  const query = nameOrPhone.trim();
+
+  // Search by authorName (case-insensitive) OR contactInfo (phone number)
   const { data: pitches, error: pitchError } = await supabase
     .from("IdeaPitch")
     .select("id, authorName")
-    .ilike("authorName", authorName.trim());
+    .or(`authorName.ilike.${query},contactInfo.eq.${query}`);
 
   if (pitchError || !pitches || pitches.length === 0) {
-    return { error: "We couldn't find a pitch submitted under that name. Please check and try again." };
+    return { error: "We couldn't find a pitch with that name or phone number. Please check and try again." };
   }
 
   // Save subscription for all matching pitches
