@@ -2,6 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import webpush from "web-push";
+import { headers } from "next/headers";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
@@ -12,8 +13,8 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 }
 
 /**
- * Save a push subscription linked to a pitch (found by authorName).
- * Returns the ideaIds that were matched.
+ * Save a push subscription linked to a pitch (found by authorName or phone).
+ * Also captures and stores the requester's IP on the matched pitch rows.
  */
 export async function savePushSubscription(
   nameOrPhone: string,
@@ -25,17 +26,52 @@ export async function savePushSubscription(
 
   const query = nameOrPhone.trim();
 
+  // Capture the visitor's IP address from request headers
+  let ip: string | null = null;
+  try {
+    const headersList = await headers();
+    const rawIp =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      null;
+    ip = rawIp ? rawIp.split(",")[0].trim() : null;
+  } catch (e) {
+    console.error("Failed to read IP from headers:", e);
+  }
+
   // Search by authorName (case-insensitive) OR contactInfo (phone number)
   const { data: pitches, error: pitchError } = await supabase
     .from("IdeaPitch")
-    .select("id, authorName")
+    .select("id, authorName, ipAddress")
     .or(`authorName.ilike.${query},contactInfo.eq.${query}`);
 
   if (pitchError || !pitches || pitches.length === 0) {
     return { error: "We couldn't find a pitch with that name or phone number. Please check and try again." };
   }
 
-  // Save subscription for all matching pitches
+  // Update ipAddress on pitches that don't already have one
+  if (ip) {
+    const pitchIdsWithoutIp = pitches
+      .filter((p) => !p.ipAddress)
+      .map((p) => p.id);
+
+    if (pitchIdsWithoutIp.length > 0) {
+      const { error: updateError } = await supabase
+        .from("IdeaPitch")
+        .update({ ipAddress: ip })
+        .in("id", pitchIdsWithoutIp);
+
+      if (updateError) {
+        console.error("Failed to update ipAddress on pitch:", updateError);
+      } else {
+        console.log(
+          `[Push] Updated ipAddress (${ip}) on ${pitchIdsWithoutIp.length} pitch(es) for "${query}"`
+        );
+      }
+    }
+  }
+
+  // Save push subscriptions for all matching pitches
   const subscriptionsToInsert = pitches.map((p) => ({
     ideaId: p.id,
     endpoint: subscription.endpoint,
@@ -55,6 +91,7 @@ export async function savePushSubscription(
 
   return { success: true, pitchCount: pitches.length };
 }
+
 
 /**
  * Send a push notification to all subscribers of a given pitch.
