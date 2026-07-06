@@ -3,25 +3,74 @@
 import { useState } from "react";
 import { submitIdea } from "./actions";
 import { NotificationOptIn } from "./NotificationOptIn";
-
 export function DesktopPitchForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg(null);
     const formData = new FormData(e.currentTarget);
+    const authorName = formData.get("authorName") as string;
     const res = await submitIdea(formData);
     setIsLoading(false);
     if (res?.error) {
       setErrorMsg(res.error);
     } else {
+      setSubmittedName(authorName || "");
+      setIsSuccess(true);
       e.currentTarget.reset();
-      window.location.reload();
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div 
+        className="relative flex flex-col p-6 rounded-sm border-2 border-slate-200 bg-white shadow-[6px_6px_24px_rgba(0,0,0,0.28)] rotate-1"
+        style={{ fontFamily: "var(--font-caveat), cursive" }}
+      >
+        {/* Pin */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-red-400 shadow-md border-2 border-white/80 z-10" />
+        {/* Tape */}
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-14 h-6 bg-white/40 rounded-sm border border-white/50 shadow-sm" />
+        {/* Lined paper texture */}
+        <div
+          className="absolute inset-0 rounded-sm pointer-events-none opacity-[0.06]"
+          style={{
+            backgroundImage: "repeating-linear-gradient(transparent, transparent 26px, rgba(0,0,0,0.5) 26px, rgba(0,0,0,0.5) 27px)",
+            backgroundPositionY: "44px",
+          }}
+        />
+
+        <div className="mt-3 text-center py-4 space-y-4 relative z-10">
+          <div className="text-4xl">🚀</div>
+          <h2 className="text-3xl font-bold text-slate-900">Pitch Submitted!</h2>
+          <p className="text-base text-slate-700 leading-relaxed font-semibold">
+            Your startup idea is now live in the global feed.
+          </p>
+
+          <div className="border-b-2 border-dashed border-slate-200 my-4" />
+
+          <div className="text-left">
+            <NotificationOptIn defaultName={submittedName} />
+          </div>
+
+          <button 
+            onClick={() => {
+              setIsSuccess(false);
+              window.location.href = "/ideas";
+            }}
+            className="w-full mt-4 inline-flex items-center justify-center px-6 h-12 rounded-sm border-2 border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-lg shadow-[3px_3px_0px_rgba(0,0,0,0.15)] transition-all hover:-translate-y-0.5 active:translate-y-0"
+          >
+            Back to Feed
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 

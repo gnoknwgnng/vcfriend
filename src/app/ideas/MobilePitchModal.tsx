@@ -14,19 +14,23 @@ export function MobilePitchModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg(null);
     const formData = new FormData(e.currentTarget);
+    const authorName = formData.get("authorName") as string;
     const res = await submitIdea(formData);
     setIsLoading(false);
     if (res?.error) {
       setErrorMsg(res.error);
     } else {
-      setIsOpen(false);
-      window.location.reload();
+      setSubmittedName(authorName || "");
+      setIsSuccess(true);
+      e.currentTarget.reset();
     }
   };
 
@@ -70,54 +74,78 @@ export function MobilePitchModal() {
               </div>
               
               <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleSubmit}>
-                  <div className="space-y-4 pt-6 px-6">
-                    {/* Notification opt-in for existing founders */}
-                    <NotificationOptIn />
-
-                    {/* Anti-Abuse Warning Notice */}
-                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 leading-normal font-semibold">
-                      ⚠️ Please do not misuse this platform. Spammers' IP addresses are logged, and invalid submissions are blocked by AI automatically.
+                {isSuccess ? (
+                  <div className="p-6 text-center space-y-6">
+                    <div className="text-5xl">🚀</div>
+                    <h2 className="text-2xl font-bold text-slate-800">Pitch Submitted!</h2>
+                    <p className="text-base text-slate-600 leading-relaxed font-semibold">
+                      Your startup idea is now live in the global feed.
+                    </p>
+                    <div className="border-t border-slate-100 my-4" />
+                    <div className="text-left font-sans">
+                      <NotificationOptIn defaultName={submittedName} />
                     </div>
-
-                    {errorMsg && (
-                      <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
-                        ❌ {errorMsg}
-                      </div>
-                    )}
-
-                    <div className="space-y-3">
-                      <Input 
-                        name="authorName" 
-                        placeholder="Your Name (Optional)" 
-                        className="bg-slate-50 border-slate-200 h-12"
-                      />
-                      <Input 
-                        name="contactInfo" 
-                        placeholder="Contact Phone Number (Optional)" 
-                        className="bg-slate-50 border-slate-200 h-12"
-                        type="tel"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Textarea 
-                        name="content" 
-                        placeholder="I am building a platform that helps..." 
-                        className="min-h-[150px] bg-slate-50 border-slate-200 resize-none text-base"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="bg-slate-50/80 mt-6 pb-8 sm:pb-6 pt-4 px-6 border-t border-slate-100">
-                    <Button 
-                      type="submit" 
-                      disabled={isLoading}
-                      className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-14 text-lg"
+                    <Button
+                      onClick={() => {
+                        setIsSuccess(false);
+                        setIsOpen(false);
+                        window.location.href = "/ideas";
+                      }}
+                      className="w-full font-bold shadow-md bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl h-14 text-lg border"
                     >
-                      {isLoading ? "Submitting..." : "Submit Pitch"}
+                      Back to Feed
                     </Button>
                   </div>
-                </form>
+                ) : (
+                  <form onSubmit={handleSubmit}>
+                    <div className="space-y-4 pt-6 px-6">
+                      {/* Notification opt-in for existing founders */}
+                      <NotificationOptIn />
+
+                      {/* Anti-Abuse Warning Notice */}
+                      <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 leading-normal font-semibold">
+                        ⚠️ Please do not misuse this platform. Spammers' IP addresses are logged, and invalid submissions are blocked by AI automatically.
+                      </div>
+
+                      {errorMsg && (
+                        <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
+                          ❌ {errorMsg}
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        <Input 
+                          name="authorName" 
+                          placeholder="Your Name (Optional)" 
+                          className="bg-slate-50 border-slate-200 h-12"
+                        />
+                        <Input 
+                          name="contactInfo" 
+                          placeholder="Contact Phone Number (Optional)" 
+                          className="bg-slate-50 border-slate-200 h-12"
+                          type="tel"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Textarea 
+                          name="content" 
+                          placeholder="I am building a platform that helps..." 
+                          className="min-h-[150px] bg-slate-50 border-slate-200 resize-none text-base"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="bg-slate-50/80 mt-6 pb-8 sm:pb-6 pt-4 px-6 border-t border-slate-100">
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-14 text-lg"
+                      >
+                        {isLoading ? "Submitting..." : "Submit Pitch"}
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </div>
             </div>
           </motion.div>

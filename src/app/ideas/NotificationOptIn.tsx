@@ -6,8 +6,12 @@ import { savePushSubscription } from "./push-actions";
 
 type Status = "idle" | "loading" | "success" | "denied" | "error" | "unsupported";
 
-export function NotificationOptIn() {
-  const [nameOrPhone, setNameOrPhone] = useState("");
+interface NotificationOptInProps {
+  defaultName?: string;
+}
+
+export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) {
+  const [nameOrPhone, setNameOrPhone] = useState(defaultName || "");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
