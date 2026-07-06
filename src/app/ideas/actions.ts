@@ -25,21 +25,26 @@ async function moderatePitchWithAI(content: string): Promise<{ isSpam: boolean; 
           {
             role: "system",
             content: `You are an AI content moderator for 'VC Friend', a startup pitching platform.
-Your task is to analyze the text and determine if it is a legitimate startup pitch or if it is spam/advertisement/malicious content/gibberish.
+Your task is to analyze the text (which could be a startup pitch or a user comment/feedback) and determine if it is spam, contains offensive/profane/bad language, or is otherwise inappropriate.
 
-Criteria for a legitimate pitch:
-- Explains a business idea, product, service, startup, or problem they want to solve.
-- E.g. "I am building X to solve Y..." or "Looking for feedback on a SaaS tool that..."
+Determine if the content should be BLOCKED (isSpam = true) based on these rules:
 
-Criteria for SPAM (isSpam = true):
+1. PROFANITY & BAD WORDS:
+- Contains swear words, profanity, vulgar language, insults, slurs, or harassment.
+- Any form of offensive, abusive, or inappropriate language.
+
+2. LEGITIMATE startup context:
+- For pitches: Should describe a business idea, product, service, or problem they want to solve.
+- For comments/feedback: Should be constructive questions, feedback, advice, or professional comments about the pitch.
+
+3. SPAM & GIBBERISH:
 - General chat, testing, gibberish (e.g. "asdf", "hello test", "123").
-- Direct advertisements for WhatsApp groups, Telegram channels, marketing agencies, or unrelated services (e.g., "Get free leads, WhatsApp me at X...").
-- Off-topic rants, spam links, insults, or harassment.
+- Direct advertisements for WhatsApp groups, Telegram channels, marketing agencies, or unrelated services.
 
 Respond ONLY with a JSON object in this format:
 {
   "isSpam": true/false,
-  "reason": "Brief explanation of why it was classified as spam (only if isSpam is true)"
+  "reason": "Brief explanation of why it was blocked (only if isSpam is true)"
 }`
           },
           {
