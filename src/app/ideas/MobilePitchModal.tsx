@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { submitIdea } from "./actions";
 import { motion, AnimatePresence } from "framer-motion";
+import { NotificationOptIn } from "./NotificationOptIn";
 
 export function MobilePitchModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,6 +72,9 @@ export function MobilePitchModal() {
               <div className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4 pt-6 px-6">
+                    {/* Notification opt-in for existing founders */}
+                    <NotificationOptIn />
+
                     {/* Anti-Abuse Warning Notice */}
                     <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 leading-normal font-semibold">
                       ⚠️ Please do not misuse this platform. Spammers' IP addresses are logged, and invalid submissions are blocked by AI automatically.

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
-import { CustomCursor } from "@/components/ui/CustomCursor";
 import { Preloader } from "@/components/ui/Preloader";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import Script from "next/script";
@@ -64,7 +63,6 @@ export default function RootLayout({
 
         <Preloader />
         <SmoothScroll>
-          <CustomCursor />
           <Navbar />
           <main className="flex-1 flex flex-col">
             {children}

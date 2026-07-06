@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { submitIdea } from "./actions";
+import { NotificationOptIn } from "./NotificationOptIn";
 
 export function DesktopPitchForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -44,6 +45,9 @@ export function DesktopPitchForm() {
         <h2 className="text-2xl font-bold text-slate-900">Pitch Your Idea</h2>
         <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-1">What are you building?</p>
       </div>
+
+      {/* Already-pitched notification opt-in */}
+      <NotificationOptIn />
 
       {/* Anti-Abuse Warning Notice */}
       <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-sm text-[12px] text-red-700 leading-normal font-bold">

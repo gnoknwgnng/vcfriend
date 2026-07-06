@@ -3,6 +3,7 @@
 import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { sendPushNotification } from "./push-actions";
 
 async function moderatePitchWithAI(content: string): Promise<{ isSpam: boolean; reason?: string }> {
   const apiKey = process.env.GROQ_API_KEY;
@@ -245,6 +246,10 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
   }
 
   revalidatePath(`/ideas/${ideaId}`);
+
+  // Fire push notification to pitch author subscribers (non-blocking)
+  sendPushNotification(ideaId, authorName || "Someone", trimmedContent).catch(() => {});
+
   return { success: true, comment: data };
 }
 
@@ -274,5 +279,9 @@ export async function submitVCComment(ideaId: string, vcName: string, content: s
   }
 
   revalidatePath(`/ideas/${ideaId}`);
+
+  // Fire push notification to pitch author subscribers (non-blocking)
+  sendPushNotification(ideaId, `${vcName.trim()} (Investor)`, content.trim()).catch(() => {});
+
   return { success: true, comment: data };
 }
