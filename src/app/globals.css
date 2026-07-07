@@ -300,5 +300,19 @@ option {
   background-color: #ffffff !important;
 }
 
+/* Force light theme styling on mobile forms regardless of device/OS dark mode */
+.light-theme-form input,
+.light-theme-form textarea {
+  color: #0f172a !important; /* slate-900 dark text */
+  background-color: #f8fafc !important; /* slate-50 background */
+  border-color: #cbd5e1 !important; /* slate-300 border */
+}
+
+.light-theme-form input::placeholder,
+.light-theme-form textarea::placeholder {
+  color: #94a3b8 !important; /* slate-400 placeholder text */
+}
+
+
 
 

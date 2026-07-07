@@ -97,7 +97,7 @@ export function MobilePitchModal() {
                     </Button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit} className="light-theme-form">
                     <div className="space-y-4 pt-6 px-6 text-slate-900">
                       {/* Notification opt-in for existing founders */}
                       <NotificationOptIn />

@@ -43,7 +43,7 @@ export function HeroSection() {
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl leading-[1.1]">
               <span className="block overflow-hidden">
                 <motion.span
-                  className="block chalk-heading"
+                  className="block chalk-heading animate-fade-in"
                   initial={{ y: "110%" }}
                   animate={{ y: "0%" }}
                   transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
@@ -53,12 +53,12 @@ export function HeroSection() {
               </span>
               <span className="block overflow-hidden">
                 <motion.span
-                  className="block chalk-heading"
+                  className="block animate-fade-in"
                   initial={{ y: "110%" }}
                   animate={{ y: "0%" }}
                   transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <span className="relative inline-block">
+                  <span className="relative inline-block mr-2 select-none">
                     <span className="chalk-green chalk-underline">
                       Investor
                     </span>
@@ -78,13 +78,19 @@ export function HeroSection() {
                         transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
                       />
                     </svg>
-                  </span>{" "}for Your Startup
+                  </span>{" "}
+                  <span className="chalk-heading">
+                    for Your Startup
+                  </span>
                 </motion.span>
               </span>
             </h1>
             <RevealOnScroll once={false} delay={0.2}>
-              <p className="mx-auto max-w-[700px] chalk-text text-xl font-medium leading-relaxed mt-4">
-                Explore thousands of active venture capital firms, pitch your ideas to the community, and make smarter fundraising decisions—<strong className="chalk-green">completely free.</strong>
+              <p className="mx-auto max-w-[700px] text-xl font-medium leading-relaxed mt-4">
+                <span className="chalk-text">
+                  Explore thousands of active venture capital firms, pitch your ideas to the community, and make smarter fundraising decisions—
+                </span>
+                <strong className="chalk-green">completely free.</strong>
               </p>
             </RevealOnScroll>
           </motion.div>
