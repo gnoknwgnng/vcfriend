@@ -154,7 +154,22 @@
 
 /* ── Chalkboard Background ─────────────────────────────────────────────── */
 /* Applied globally via body — gives the entire page a real green board look */
+:root {
+  --board-frame-thickness: 20px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --board-frame-thickness: 10px;
+  }
+}
+
+header.sticky, header {
+  top: var(--board-frame-thickness) !important;
+}
+
 body {
+  padding: var(--board-frame-thickness) !important;
   background-color: #074730 !important;
   background-image:
     /* SVG fractal noise for high-fidelity chalk grain/dust overlay */
@@ -278,5 +293,12 @@ html.lenis body {
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
+
+/* Dropdown option text visibility fix */
+option {
+  color: #0f172a !important; /* dark slate-900 */
+  background-color: #ffffff !important;
+}
+
 
 

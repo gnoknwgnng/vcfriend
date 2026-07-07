@@ -98,7 +98,7 @@ export function MobilePitchModal() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit}>
-                    <div className="space-y-4 pt-6 px-6">
+                    <div className="space-y-4 pt-6 px-6 text-slate-900">
                       {/* Notification opt-in for existing founders */}
                       <NotificationOptIn />
 
@@ -117,12 +117,12 @@ export function MobilePitchModal() {
                         <Input 
                           name="authorName" 
                           placeholder="Your Name (Optional)" 
-                          className="bg-slate-50 border-slate-200 h-12"
+                          className="bg-slate-50 border-slate-200 h-12 text-slate-900 placeholder:text-slate-400"
                         />
                         <Input 
                           name="contactInfo" 
                           placeholder="Contact Phone Number (Optional)" 
-                          className="bg-slate-50 border-slate-200 h-12"
+                          className="bg-slate-50 border-slate-200 h-12 text-slate-900 placeholder:text-slate-400"
                           type="tel"
                         />
                       </div>
@@ -130,7 +130,7 @@ export function MobilePitchModal() {
                         <Textarea 
                           name="content" 
                           placeholder="I am building a platform that helps..." 
-                          className="min-h-[150px] bg-slate-50 border-slate-200 resize-none text-base"
+                          className="min-h-[150px] bg-slate-50 border-slate-200 resize-none text-base text-slate-900 placeholder:text-slate-400"
                           required
                         />
                       </div>
