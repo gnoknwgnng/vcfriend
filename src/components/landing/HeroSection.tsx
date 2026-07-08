@@ -21,13 +21,13 @@ export function HeroSection() {
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-teal-500/5 rounded-[100%] blur-[100px] z-[2] pointer-events-none" />
       
       <div className="container px-4 md:px-6 relative z-10 pt-10 pb-8">
-        <div className="flex flex-col items-center space-y-6 text-center max-w-4xl mx-auto">
+        <div className="flex flex-col items-center space-y-4 md:space-y-6 text-center max-w-4xl mx-auto">
           
           <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-            className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/20 backdrop-blur-md px-4 py-2 text-sm font-semibold text-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.3)] mb-2 hover:bg-emerald-500/30 transition-colors cursor-default"
+            className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/20 backdrop-blur-md px-4 py-2 text-sm font-semibold text-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.3)] mb-1 hover:bg-emerald-500/30 transition-colors cursor-default"
           >
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 mr-3 animate-ping absolute"></span>
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 mr-3"></span>
@@ -38,9 +38,9 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="space-y-4"
+            className="space-y-3 md:space-y-4"
           >
-            <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl leading-[1.1]">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.1]">
               <span className="block overflow-hidden">
                 <motion.span
                   className="block chalk-heading animate-fade-in"
@@ -86,7 +86,7 @@ export function HeroSection() {
               </span>
             </h1>
             <RevealOnScroll once={false} delay={0.2}>
-              <p className="mx-auto max-w-[700px] text-xl font-medium leading-relaxed mt-4">
+              <p className="mx-auto max-w-[700px] text-lg md:text-xl font-medium leading-relaxed mt-2 md:mt-4">
                 <span className="chalk-text">
                   Explore thousands of active venture capital firms, pitch your ideas to the community, and make smarter fundraising decisions—
                 </span>
@@ -99,7 +99,7 @@ export function HeroSection() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-5 mt-10 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row gap-4 mt-6 md:mt-10 w-full sm:w-auto"
           >
             <MagneticButton href="/onboarding">
               <span className="inline-flex h-14 items-center justify-center rounded-full bg-emerald-600 px-10 text-lg font-bold text-white shadow-[0_10px_40px_-10px_rgba(16,185,129,0.7)] hover:bg-emerald-500 hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.9)] transition-all w-full sm:w-auto group">
@@ -109,7 +109,7 @@ export function HeroSection() {
             </MagneticButton>
             
             <MagneticButton href="/ideas">
-              <span className="inline-flex h-14 items-center justify-center rounded-full border border-slate-200 bg-white/50 backdrop-blur-md px-10 text-lg font-bold text-slate-700 shadow-sm hover:bg-white transition-all w-full sm:w-auto">
+              <span className="inline-flex h-14 items-center justify-center rounded-full border-2 border-emerald-800/10 bg-[#faf8f2] px-10 text-lg font-bold text-slate-800 shadow-md hover:bg-white hover:text-slate-900 transition-all w-full sm:w-auto">
                 Pitch Your Idea
               </span>
             </MagneticButton>
