@@ -72,6 +72,7 @@ const stories = [
     year: "1994",
     description: "Run from a cramped garage. Stock crashed 94% in 2001. Wall Street called it 'Amazon.bomb'.",
     struggle: "He cut costs to the bone, built AWS internally to survive, and proved every single analyst wrong.",
+    image: "/images/founders/bezos.jpg",
   },
   {
     name: "Apple",
@@ -79,6 +80,7 @@ const stories = [
     year: "1976",
     description: "Started in a suburban garage building circuit boards by hand with almost zero capital.",
     struggle: "Jobs sold his VW bus, Wozniak sold his HP calculator — together they raised just $1,350 to start.",
+    image: "/images/founders/jobs.jpg",
   },
   {
     name: "Facebook",
@@ -86,6 +88,7 @@ const stories = [
     year: "2004",
     description: "Coded in a Harvard dorm room. Faced massive lawsuits from day one.",
     struggle: "Turned down a $1B acquisition offer from Yahoo when the company had almost no revenue.",
+    image: "/images/founders/zuck.jpg",
   },
   {
     name: "Airbnb",
@@ -93,6 +96,7 @@ const stories = [
     year: "2008",
     description: "Renting air mattresses in their apartment to pay rent. Rejected by 15 investors.",
     struggle: "Maxed out credit cards. Sold 'Obama O's' cereal boxes just to keep servers alive.",
+    image: "/images/founders/chesky.jpg",
   },
   {
     name: "SpaceX / Tesla",
@@ -100,6 +104,7 @@ const stories = [
     year: "2008",
     description: "Tesla was bankrupt. First 3 SpaceX rockets exploded. Both companies near death.",
     struggle: "Split his last $30M between two dying companies. The 4th rocket launch was do-or-die.",
+    image: "/images/founders/musk.jpg",
   },
   {
     name: "Disney",
@@ -107,6 +112,7 @@ const stories = [
     year: "1923",
     description: "Fired for 'lacking imagination'. His first studio went bankrupt. Ate dog food to survive.",
     struggle: "His first hit character (Oswald) was legally stolen by his own distributor. He started over.",
+    image: "/images/founders/disney.jpg",
   },
 ];
 
@@ -149,8 +155,8 @@ export function FounderStories() {
                 viewport={{ once: true, margin: "-5% 0px" }}
                 transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ scale: 1.04, zIndex: 20 }}
-                className={`
-                  group relative flex flex-col p-6 rounded-sm border-2 cursor-interactive
+                 className={`
+                  group relative flex flex-col pl-6 pt-6 pb-6 pr-20 md:pr-24 rounded-sm border-2 cursor-interactive
                   shadow-[5px_5px_18px_rgba(0,0,0,0.25)] hover:shadow-[0_28px_70px_rgba(0,0,0,0.3)]
                   ${c.card} ${c.rotate}
                   transition-shadow duration-300
@@ -171,6 +177,26 @@ export function FounderStories() {
                     backgroundPositionY: "44px",
                   }}
                 />
+
+                {/* Polaroid Photo */}
+                <div 
+                  className="absolute top-12 right-4 w-14 h-18 md:w-16 md:h-20 bg-white border border-slate-200 p-1 shadow-md rotate-[4deg] group-hover:rotate-[12deg] group-hover:scale-105 transition-all duration-300 z-10"
+                  style={{ fontFamily: "sans-serif" }}
+                >
+                  <div className="relative w-full h-[76%] overflow-hidden bg-slate-100 border-b border-slate-100">
+                    <img 
+                      src={story.image} 
+                      alt={story.founder} 
+                      className="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-300"
+                    />
+                  </div>
+                  <div 
+                    className="text-[6px] text-center mt-0.5 leading-none font-bold text-slate-800 uppercase tracking-wide overflow-hidden text-ellipsis whitespace-nowrap"
+                    style={{ fontFamily: "var(--font-caveat), cursive" }}
+                  >
+                    {story.founder.split(' ')[0]}
+                  </div>
+                </div>
 
                 {/* Year badge */}
                 <div className={`self-start mb-4 mt-3 px-3 py-1 rounded-full border text-xs font-bold tracking-widest uppercase ${c.badge}`}>

@@ -27,6 +27,12 @@ export function Navbar() {
             >
               Pitch Ideas
             </Link>
+            <Link
+              href="/schemes"
+              className="flex items-center text-sm font-medium text-emerald-200/70 hover:text-emerald-100 transition-colors chalk-text"
+            >
+              Govt Schemes
+            </Link>
           </nav>
         </div>
 
