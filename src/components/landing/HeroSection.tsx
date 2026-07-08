@@ -113,6 +113,12 @@ export function HeroSection() {
                 Pitch Your Idea
               </span>
             </MagneticButton>
+
+            <MagneticButton href="/schemes">
+              <span className="inline-flex h-14 items-center justify-center rounded-full bg-amber-600 px-10 text-lg font-bold text-white shadow-[0_10px_40px_-10px_rgba(217,119,6,0.7)] hover:bg-amber-500 hover:shadow-[0_15px_50px_-10px_rgba(217,119,6,0.9)] transition-all w-full sm:w-auto">
+                Government Schemes
+              </span>
+            </MagneticButton>
           </motion.div>
           
           {/* New 8-Card Grid replacing the 3D Deck */}
