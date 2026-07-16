@@ -6,9 +6,13 @@ export function Footer() {
       <div className="container px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-2 space-y-4">
-            <span className="inline-block font-extrabold text-3xl tracking-tight text-gradient">
-              VC Friend
-            </span>
+            <Link href="/" className="inline-block">
+              <img 
+                src="/images/logo-transparent.png" 
+                alt="VC Friend Logo" 
+                className="h-10 md:h-12 w-auto object-contain hover:opacity-90 transition-opacity"
+              />
+            </Link>
             <p className="text-muted-foreground max-w-sm text-lg leading-relaxed">
               Empowering founders with transparency and community. Find the perfect investor, pitch your ideas safely, and build the future.
             </p>

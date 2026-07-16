@@ -14,9 +14,11 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex gap-6 md:gap-10">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="inline-block font-bold text-xl tracking-tight chalk-heading">
-                VC Friend
-              </span>
+              <img 
+                src="/images/logo-transparent.png" 
+                alt="VC Friend" 
+                className="h-9 md:h-10 w-auto object-contain hover:opacity-90 transition-opacity"
+              />
             </Link>
             
             {/* Desktop Navigation */}
