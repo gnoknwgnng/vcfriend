@@ -54,6 +54,27 @@ export default function RootLayout({
           `}
         </Script>
 
+        {/* JSON-LD Structured Data Schema Markup */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "VC Friend",
+              "operatingSystem": "All",
+              "applicationCategory": "BusinessApplication",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "description": "A free, community-driven platform that helps startup founders discover venture capital firms and search 220+ government funding schemes.",
+              "url": "https://www.vcfriend.online"
+            })
+          }}
+        />
+
         {/* SVG Filter for realistic rough chalk texture */}
         <svg xmlns="http://www.w3.org/2000/svg" className="absolute w-0 h-0 pointer-events-none" style={{ visibility: "hidden" }}>
           <defs>
