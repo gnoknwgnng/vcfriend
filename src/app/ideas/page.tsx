@@ -6,7 +6,10 @@ import { ChevronLeft, MessageSquareQuote } from "lucide-react";
 import { MobilePitchModal } from "./MobilePitchModal";
 import { DesktopPitchForm } from "./DesktopPitchForm";
 
-export const revalidate = 0; // Dynamic route
+export const metadata = {
+  title: "Startup Pitch & Fundraiser Ideas Feed - VC Friend",
+  description: "Browse community startup pitches, share your fundraiser concepts anonymously, and get constructive feedback from verified investors and founders.",
+};
 
 export default async function IdeaFeedPage({
   searchParams,

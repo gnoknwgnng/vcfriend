@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-export const revalidate = 0; // Dynamic rendering for search parameters
+export const metadata = {
+  title: "Venture Capital Directory & Fundraiser Search - VC Friend",
+  description: "Browse active venture capital firms, filter investors by investment stage and sector focus, and accelerate your startup fundraising campaign.",
+};
 
 export default async function VCDirectory({
   searchParams,

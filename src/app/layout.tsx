@@ -22,8 +22,33 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "VC Friend - Find Startup Investors & Government Funding",
-  description: "Discover active venture capital firms, search 220+ government funding schemes, explore startup grants, and pitch your ideas to verified investors completely free.",
+  title: "VC Friend - Free Startup Fundraising Platform & Investors",
+  description: "Find active venture capital firms, search 220+ government funding schemes, explore startup grants, and pitch your ideas to verified investors completely free.",
+  keywords: [
+    "fundraising",
+    "startup fundraising",
+    "fundraising platform",
+    "venture capital",
+    "government funding",
+    "startup grants",
+    "investor database",
+    "raise capital"
+  ],
+  openGraph: {
+    title: "VC Friend - Free Startup Fundraising Platform",
+    description: "Discover active venture capital firms, search 220+ government funding schemes, and pitch your ideas to verified investors completely free.",
+    url: "https://www.vcfriend.online",
+    siteName: "VC Friend",
+    images: [
+      {
+        url: "https://www.vcfriend.online/images/logo.png",
+        width: 352,
+        height: 352,
+      }
+    ],
+    locale: "en_US",
+    type: "website",
+  },
   verification: {
     google: "PjoNq-gpk52sBARPwlBixfWfrvZfH4Pec1htoZ588i0",
   },
