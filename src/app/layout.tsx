@@ -22,8 +22,8 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "VC Friend - Discover Venture Capital Firms",
-  description: "A free, community-driven platform that helps startup founders discover venture capital firms actively investing worldwide.",
+  title: "VC Friend - Find Startup Investors & Government Funding",
+  description: "Discover active venture capital firms, search 220+ government funding schemes, explore startup grants, and pitch your ideas to verified investors completely free.",
   verification: {
     google: "PjoNq-gpk52sBARPwlBixfWfrvZfH4Pec1htoZ588i0",
   },

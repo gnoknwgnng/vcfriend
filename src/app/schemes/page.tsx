@@ -3,8 +3,8 @@ import path from "path";
 import { GovernmentSchemesClient } from "./GovernmentSchemesClient";
 
 export const metadata = {
-  title: "Government Schemes - VC Friend",
-  description: "Search and discover central and state government funding schemes, grants, and support programs for Indian startups.",
+  title: "Government Funding & Schemes for Startups - VC Friend",
+  description: "Search and discover 220+ central and state government funding schemes, startup grants, MSME loans, and support programs for Indian entrepreneurs.",
 };
 
 export default async function GovernmentSchemesPage() {
