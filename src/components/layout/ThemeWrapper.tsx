@@ -4,15 +4,26 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "./Navbar";
 import { Preloader } from "../ui/Preloader";
 import { SmoothScroll } from "../ui/SmoothScroll";
-import React from "react";
+import React, { useEffect } from "react";
 
 export function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
+  useEffect(() => {
+    if (isAdmin) {
+      document.body.classList.add("admin-body-override");
+    } else {
+      document.body.classList.remove("admin-body-override");
+    }
+    return () => {
+      document.body.classList.remove("admin-body-override");
+    };
+  }, [isAdmin]);
+
   if (isAdmin) {
     return (
-      <main className="flex-1 flex flex-col min-h-screen bg-slate-950 font-sans">
+      <main className="flex-1 flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans">
         {children}
       </main>
     );

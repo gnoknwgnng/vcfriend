@@ -150,17 +150,17 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-900 font-sans">
-        <div className="max-w-md w-full space-y-6 bg-slate-800 border border-slate-700/60 p-8 rounded-xl shadow-2xl animate-fade-in text-center">
+      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 font-sans">
+        <div className="max-w-md w-full space-y-6 bg-white border border-slate-200/80 p-8 rounded-xl shadow-xl animate-fade-in text-center">
           <div className="space-y-4">
-            <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-lg">
-              <ShieldCheck className="w-7 h-7 text-emerald-400" />
+            <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
+              <ShieldCheck className="w-7 h-7 text-emerald-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
+              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
                 Investor Access Portal
               </h2>
-              <p className="text-slate-400 text-sm mt-1">
+              <p className="text-slate-500 text-sm mt-1">
                 Please enter the passcode to access the reviews & highlights board.
               </p>
             </div>
@@ -170,23 +170,23 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 placeholder="Enter password..."
-                className="flex h-12 w-full rounded-lg border border-slate-700 bg-slate-900 text-white px-3 py-2 text-center text-lg focus:outline-none focus:border-emerald-500 shadow-inner font-semibold transition-colors"
+                className="flex h-12 w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-800 px-3 py-2 text-center text-lg focus:outline-none focus:border-emerald-500 shadow-inner font-semibold transition-colors"
                 required
               />
               {authError && (
-                <p className="text-rose-400 text-sm font-semibold">{authError}</p>
+                <p className="text-rose-500 text-sm font-semibold">{authError}</p>
               )}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center px-4 h-12 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base shadow-lg hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer"
+                className="w-full flex items-center justify-center px-4 h-12 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-sm hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer"
               >
                 Unlock Portal
               </button>
             </form>
-            <div className="mt-4 pt-4 border-t border-slate-700/60">
+            <div className="mt-4 pt-4 border-t border-slate-100">
               <Link 
                 href="/" 
-                className="text-sm font-semibold text-slate-400 hover:text-white underline transition-colors"
+                className="text-sm font-semibold text-slate-500 hover:text-slate-800 underline transition-colors"
               >
                 Back to Homepage
               </Link>
@@ -198,32 +198,32 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         
         {/* Page Header */}
-        <div className="border-b border-slate-800 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="border-b border-slate-200 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1.5">
             <Link 
               href="/" 
-              className="inline-flex items-center text-sm font-semibold text-slate-400 hover:text-white transition-colors mb-2"
+              className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-2"
             >
               <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
             </Link>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
               Investor Admin Dashboard
             </h1>
-            <p className="text-slate-400 text-sm">
+            <p className="text-slate-500 text-sm">
               Sleek control center to filter startup pitches, post verified VC reviews, and highlight selected ideas.
             </p>
           </div>
           
           {/* Quick Info */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 flex items-center gap-3 self-start sm:self-center">
-            <Building className="w-5 h-5 text-emerald-400" />
+          <div className="bg-white border border-slate-200/80 rounded-lg px-4 py-3 flex items-center gap-3 self-start sm:self-center shadow-sm">
+            <Building className="w-5 h-5 text-emerald-600" />
             <div>
-              <span className="block text-xs text-slate-500 leading-none">Logged in as</span>
-              <span className="text-sm font-bold text-slate-200 mt-1 block">
+              <span className="block text-xs text-slate-400 leading-none">Logged in as</span>
+              <span className="text-sm font-bold text-slate-700 mt-1 block">
                 {vcName || "VC Partner"}
               </span>
             </div>
@@ -233,45 +233,45 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         {/* KPI Cards / Statistics Panel */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Metric 1 */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex items-center gap-5 shadow-lg">
-            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <MessageSquare className="w-5 h-5 text-emerald-400" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
+            <div className="w-12 h-12 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
+              <MessageSquare className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-white leading-none">
+              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
                 {ideas.length}
               </span>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
                 Total Pitches Submitted
               </span>
             </div>
           </div>
 
           {/* Metric 2 */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex items-center gap-5 shadow-lg">
-            <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-              <Tag className="w-5 h-5 text-amber-400" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
+            <div className="w-12 h-12 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 shadow-sm">
+              <Tag className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-white leading-none">
+              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
                 {Object.keys(sectorCounts).length}
               </span>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
                 Active Classified Sectors
               </span>
             </div>
           </div>
 
           {/* Metric 3 */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex items-center gap-5 shadow-lg">
-            <div className="w-12 h-12 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-5 h-5 text-sky-400" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
+            <div className="w-12 h-12 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 shadow-sm">
+              <BarChart3 className="w-5 h-5 text-sky-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-white leading-none">
+              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
                 {filteredIdeas.length}
               </span>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
                 Filtered Pitches Matches
               </span>
             </div>
@@ -279,20 +279,20 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         </div>
 
         {/* Filter and Search Bar Section */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-5 shadow-md">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-5 shadow-sm">
           
           {/* Sector Filter Dropdown */}
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <Filter className="w-5 h-5 text-slate-400 shrink-0" />
+            <Filter className="w-5 h-5 text-slate-500 shrink-0" />
             <div className="relative flex-1 md:w-64">
               <select
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
-                style={{ backgroundImage: 'url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%2394a3b8\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', backgroundRepeat: 'no-repeat' }}
+                className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
+                style={{ backgroundImage: 'url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', backgroundRepeat: 'no-repeat' }}
               >
                 {uniqueSectors.map((sector) => (
-                  <option key={sector} value={sector} className="bg-slate-950 text-slate-200">
+                  <option key={sector} value={sector} className="bg-white text-slate-700">
                     {sector === "All Sectors" ? "All Sectors" : `${sector} (${sectorCounts[sector] || 0})`}
                   </option>
                 ))}
@@ -308,9 +308,9 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by author or keywords..."
-                className="w-full bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 rounded-lg pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 shadow-inner transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-lg pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 shadow-inner transition-colors"
               />
-              <Search className="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
         </div>
@@ -318,8 +318,8 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         {/* Grid of Pitches */}
         <div className="space-y-6">
           {filteredIdeas.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-slate-800 rounded-xl bg-slate-900/40">
-              <p className="text-slate-400 text-lg">No pitches match your current filter settings.</p>
+            <div className="text-center py-20 border border-dashed border-slate-200 rounded-xl bg-slate-100/40 animate-fade-in">
+              <p className="text-slate-500 text-lg">No pitches match your current filter settings.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -328,13 +328,13 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 return (
                   <div 
                     key={idea.id}
-                    className="flex flex-col p-6 rounded-xl border border-slate-800/80 bg-slate-900 hover:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="flex flex-col p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-300"
                   >
                     {/* Card Header */}
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                       <div>
-                        <span className="font-bold text-sm text-slate-200">{idea.authorName || "Anonymous Founder"}</span>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                        <span className="font-bold text-sm text-slate-900">{idea.authorName || "Anonymous Founder"}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
                         </div>
@@ -342,29 +342,29 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                       <Link
                         href={`/ideas/${idea.id}`}
                         target="_blank"
-                        className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
+                        className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
                       >
                         Open Feed <ExternalLink className="w-3 h-3" />
                       </Link>
                     </div>
 
                     {/* Pitch Content */}
-                    <p className="text-slate-300 text-[14px] leading-relaxed mb-4 flex-grow font-normal">
+                    <p className="text-slate-600 text-[14px] leading-relaxed mb-4 flex-grow font-normal">
                       {idea.content}
                     </p>
 
                     {/* Auto-Classified Sector Tag */}
                     <div className="mb-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold uppercase bg-slate-800 border border-slate-700 text-slate-300">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold uppercase bg-slate-50 border border-slate-100 text-slate-600">
                         <Tag className="w-3.5 h-3.5 text-slate-400" />
                         Sector: {idea.sector}
                       </span>
                     </div>
 
                     {/* VC Review Editor - Professional SaaS Form style */}
-                    <div className="pt-4 border-t border-slate-800 space-y-4 mt-auto">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Award className="w-4 h-4 text-emerald-400" />
+                    <div className="pt-4 border-t border-slate-100 space-y-4 mt-auto">
+                      <div className="flex items-center gap-1.5 text-slate-500">
+                        <Award className="w-4 h-4 text-emerald-600" />
                         <span className="text-xs font-bold uppercase tracking-wider">
                           Post Verified VC Feedback
                         </span>
@@ -377,7 +377,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                           value={vcName}
                           onChange={(e) => handleVcNameChange(e.target.value)}
                           placeholder="Your VC Firm Name (e.g. Sequoia Capital)"
-                          className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 text-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none transition-colors"
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 text-slate-800 rounded-lg text-sm px-3 py-2 focus:outline-none transition-colors"
                           required
                         />
                       </div>
@@ -388,19 +388,19 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                           value={activeReviews[idea.id] || ""}
                           onChange={(e) => setActiveReviews(prev => ({ ...prev, [idea.id]: e.target.value }))}
                           placeholder="Enter professional feedback to highlight this pitch..."
-                          className="w-full min-h-[90px] bg-slate-950 border border-slate-800 focus:border-emerald-500 text-slate-200 rounded-lg text-sm p-3 focus:outline-none resize-none transition-colors"
+                          className="w-full min-h-[90px] bg-slate-50 border border-slate-200 focus:border-emerald-500 text-slate-800 rounded-lg text-sm p-3 focus:outline-none resize-none transition-colors"
                           required
                         />
                       </div>
 
                       {/* Status Alerts */}
                       {reviewState.error && (
-                        <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 font-medium">
+                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-600 font-medium animate-fade-in">
                           ❌ {reviewState.error}
                         </div>
                       )}
                       {reviewState.success && (
-                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-400 font-medium">
+                        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-600 font-medium animate-fade-in">
                           ✅ Review submitted and highlighted!
                         </div>
                       )}
@@ -408,7 +408,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                       <button
                         onClick={() => handleReviewSubmit(idea.id)}
                         disabled={reviewState.loading}
-                        className="w-full mt-1 inline-flex items-center justify-center px-4 h-10 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full mt-1 inline-flex items-center justify-center px-4 h-10 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-sm hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {reviewState.loading ? "Posting..." : "Post Highlighted Review"}
                       </button>
