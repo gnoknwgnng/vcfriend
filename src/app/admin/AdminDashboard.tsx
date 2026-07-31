@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { submitVCComment } from "../ideas/actions";
-import { ChevronLeft, Award, Filter, Search, BarChart3, Tag, MessageSquare, ShieldCheck, ExternalLink, Calendar, Building } from "lucide-react";
+import { ChevronLeft, Award, Filter, Search, BarChart3, Tag, MessageSquare, ShieldCheck, ExternalLink, Calendar, Building, LogOut } from "lucide-react";
 import Link from "next/link";
 
 interface Idea {
@@ -87,6 +87,12 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
     } else {
       setAuthError("Incorrect passcode. Please try again.");
     }
+  };
+
+  const handleLogOut = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem("admin_portal_unlocked");
+    setInputPasscode("");
   };
 
   const handleReviewSubmit = async (ideaId: string) => {
@@ -204,15 +210,26 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
             </p>
           </div>
           
-          {/* Quick Info */}
-          <div className="bg-white border border-slate-200/80 rounded-lg px-4 py-3 flex items-center gap-3 self-start sm:self-center shadow-sm">
-            <Building className="w-5 h-5 text-emerald-600" />
-            <div>
-              <span className="block text-xs text-slate-400 leading-none">Logged in as</span>
-              <span className="text-sm font-bold text-slate-700 mt-1 block">
-                {vcName || "VC Partner"}
-              </span>
+          {/* Quick Info & Log Out */}
+          <div className="flex items-center gap-3 self-start sm:self-center">
+            <div className="bg-white border border-slate-200/80 rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm">
+              <Building className="w-5 h-5 text-emerald-600" />
+              <div>
+                <span className="block text-xs text-slate-400 leading-none">Logged in as</span>
+                <span className="text-sm font-bold text-slate-700 mt-1 block">
+                  {vcName || "VC Partner"}
+                </span>
+              </div>
             </div>
+            
+            <button
+              onClick={handleLogOut}
+              className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-lg px-4 py-3 text-sm font-bold shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer h-[46px]"
+              title="Log Out"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Log Out</span>
+            </button>
           </div>
         </div>
 
