@@ -7,7 +7,7 @@ export default async function AdminPage() {
   // Fetch pitched ideas
   const { data: ideas, error: ideaError } = await supabase
     .from("IdeaPitch")
-    .select("id, authorName, content, createdAt")
+    .select("id, authorName, content, createdAt, contactInfo")
     .order("createdAt", { ascending: false });
 
   if (ideaError) {

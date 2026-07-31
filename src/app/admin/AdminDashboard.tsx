@@ -10,6 +10,7 @@ interface Idea {
   authorName: string;
   content: string;
   createdAt: string;
+  contactInfo?: string;
 }
 
 interface AdminDashboardProps {
@@ -342,13 +343,6 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                           <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <Link
-                        href={`/ideas/${idea.id}`}
-                        target="_blank"
-                        className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
-                      >
-                        Open Feed <ExternalLink className="w-3 h-3" />
-                      </Link>
                     </div>
 
                     {/* Pitch Content */}
@@ -356,12 +350,17 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                       {idea.content}
                     </p>
 
-                    {/* Auto-Classified Sector Tag */}
-                    <div className="mb-5">
+                    {/* Auto-Classified Sector Tag & Contact Info */}
+                    <div className="mb-5 flex flex-wrap gap-2">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold uppercase bg-slate-50 border border-slate-100 text-slate-600">
                         <Tag className="w-3.5 h-3.5 text-slate-400" />
                         Sector: {idea.sector}
                       </span>
+                      {idea.contactInfo && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-700 select-all" title="Click to copy contact info">
+                          Contact: {idea.contactInfo}
+                        </span>
+                      )}
                     </div>
 
                     {/* VC Review Editor - Professional SaaS Form style */}
