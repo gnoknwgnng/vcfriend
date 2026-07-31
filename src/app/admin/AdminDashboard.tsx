@@ -201,23 +201,23 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
       <div className="max-w-7xl mx-auto">
         
         {/* Page Header */}
-        <div className="border-b border-slate-200 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1.5">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+        <div className="border-b border-slate-200 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
               Investor Admin Dashboard
             </h1>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 text-xs sm:text-sm">
               Sleek control center to filter startup pitches, post verified VC reviews, and highlight selected ideas.
             </p>
           </div>
           
           {/* Quick Info & Log Out */}
-          <div className="flex items-center gap-3 self-start sm:self-center">
-            <div className="bg-white border border-slate-200/80 rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm">
-              <Building className="w-5 h-5 text-emerald-600" />
-              <div>
-                <span className="block text-xs text-slate-400 leading-none">Logged in as</span>
-                <span className="text-sm font-bold text-slate-700 mt-1 block">
+          <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+            <div className="bg-white border border-slate-200/80 rounded-lg px-3 py-2 flex items-center gap-2.5 shadow-sm">
+              <Building className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
+              <div className="min-w-0">
+                <span className="block text-[9px] sm:text-xs text-slate-400 leading-none">Logged in as</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-700 mt-1 block truncate max-w-[120px] sm:max-w-none">
                   {vcName || "VC Partner"}
                 </span>
               </div>
@@ -225,74 +225,74 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
             
             <button
               onClick={handleLogOut}
-              className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-lg px-4 py-3 text-sm font-bold shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer h-[46px]"
+              className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-lg px-3 py-2 text-xs sm:text-sm font-bold shadow-sm transition-all duration-200 flex items-center gap-1.5 cursor-pointer h-[38px] sm:h-[46px] shrink-0"
               title="Log Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Log Out</span>
             </button>
           </div>
         </div>
 
         {/* KPI Cards / Statistics Panel */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-6 mb-6">
           {/* Metric 1 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
-              <MessageSquare className="w-5 h-5 text-emerald-600" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
                 {ideas.length}
               </span>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
-                Total Pitches Submitted
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+                Pitches
               </span>
             </div>
           </div>
 
           {/* Metric 2 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 shadow-sm">
-              <Tag className="w-5 h-5 text-amber-600" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
+              <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
                 {Object.keys(sectorCounts).length}
               </span>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
-                Active Classified Sectors
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+                Sectors
               </span>
             </div>
           </div>
 
           {/* Metric 3 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center gap-5 shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 shadow-sm">
-              <BarChart3 className="w-5 h-5 text-sky-600" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-sky-600" />
             </div>
             <div>
-              <span className="block text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
                 {filteredIdeas.length}
               </span>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
-                Filtered Pitches Matches
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+                Matches
               </span>
             </div>
           </div>
         </div>
 
         {/* Filter and Search Bar Section */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-5 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
           
           {/* Sector Filter Dropdown */}
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Filter className="w-5 h-5 text-slate-500 shrink-0" />
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 shrink-0" />
             <div className="relative flex-1 md:w-64">
               <select
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
                 style={{ backgroundImage: 'url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', backgroundRepeat: 'no-repeat' }}
               >
                 {uniqueSectors.map((sector) => (
@@ -305,16 +305,16 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
           </div>
 
           {/* Query Search Input */}
-          <div className="flex items-center gap-3 w-full md:w-auto flex-1 md:max-w-md">
+          <div className="flex items-center gap-2.5 w-full md:w-auto flex-1 md:max-w-md">
             <div className="relative w-full">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by author or keywords..."
-                className="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-lg pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-emerald-500 shadow-inner transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 shadow-inner transition-colors"
               />
-              <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
           </div>
         </div>
