@@ -183,14 +183,6 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 Unlock Portal
               </button>
             </form>
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <Link 
-                href="/" 
-                className="text-sm font-semibold text-slate-500 hover:text-slate-800 underline transition-colors"
-              >
-                Back to Homepage
-              </Link>
-            </div>
           </div>
         </div>
       </div>
@@ -204,12 +196,6 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         {/* Page Header */}
         <div className="border-b border-slate-200 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1.5">
-            <Link 
-              href="/" 
-              className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-2"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" /> Back to Home
-            </Link>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
               Investor Admin Dashboard
             </h1>
