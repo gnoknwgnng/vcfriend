@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Card } from "@/components/ui/card";
 import { VCReviewForm } from "./VCReviewForm";
 
 export default async function VCReviewPage({
@@ -22,10 +21,10 @@ export default async function VCReviewPage({
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/10 animate-fade-in">
-      <Card className="w-full max-w-2xl glass border-border/50 shadow-2xl">
+    <div className="flex-1 bg-mist">
+      <div className="shell py-10 md:py-16 max-w-3xl animate-fade-in">
         <VCReviewForm vcId={id} vcName={vc.name} />
-      </Card>
+      </div>
     </div>
   );
 }

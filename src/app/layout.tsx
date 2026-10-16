@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Caveat } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { ThemeWrapper } from "@/components/layout/ThemeWrapper";
 import Script from "next/script";
@@ -14,9 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const caveat = Caveat({
-  variable: "--font-caveat",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -52,6 +53,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0f2a33",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -60,9 +67,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased bg-gray-50`}
+      className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        <a href="#main" className="skip-link">Skip to content</a>
         {/* Google Analytics Script */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-8G4HXYPJ5J"
@@ -97,16 +105,6 @@ export default function RootLayout({
             })
           }}
         />
-
-        {/* SVG Filter for realistic rough chalk texture */}
-        <svg xmlns="http://www.w3.org/2000/svg" className="absolute w-0 h-0 pointer-events-none" style={{ visibility: "hidden" }}>
-          <defs>
-            <filter id="chalk-filter">
-              <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="4" result="noise" />
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-          </defs>
-        </svg>
 
         <ThemeWrapper>
           {children}

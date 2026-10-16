@@ -18,7 +18,7 @@ export function LinkifyText({ text, className = "" }: { text: string; className?
               href={part} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-emerald-600 font-bold hover:underline break-words"
+              className="text-teal font-semibold underline underline-offset-2 decoration-teal/40 hover:decoration-teal break-words"
             >
               {part}
             </a>

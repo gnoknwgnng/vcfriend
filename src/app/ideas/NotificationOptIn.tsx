@@ -88,22 +88,19 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
   };
 
   return (
-    <div
-      className="relative p-4 mb-5 rounded-sm border-2 border-dashed border-emerald-400 bg-emerald-50/80"
-      style={{ fontFamily: "var(--font-caveat), cursive" }}
-    >
+    <div className="relative p-4 mb-4 rounded-2xl border border-teal/25 bg-teal-light/60">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Bell className="w-4 h-4 text-emerald-700 shrink-0" />
-        <span className="text-[13px] font-bold uppercase tracking-wider text-emerald-800">
+        <Bell className="w-4 h-4 text-teal-deep shrink-0" />
+        <span className="text-sm font-semibold text-teal-deep">
           Already pitched? Get notified on feedback
         </span>
       </div>
 
       {status === "success" ? (
-        <div className="flex items-start gap-2 text-emerald-800">
-          <CheckCircle className="w-5 h-5 mt-0.5 shrink-0 text-emerald-600" />
-          <p className="text-[13px] font-semibold leading-snug">{message}</p>
+        <div className="flex items-start gap-2 text-teal-deep">
+          <CheckCircle className="w-5 h-5 mt-0.5 shrink-0 text-teal" />
+          <p className="text-sm leading-snug">{message}</p>
         </div>
       ) : (
         <>
@@ -113,14 +110,14 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
               value={nameOrPhone}
               onChange={(e) => { setNameOrPhone(e.target.value); setStatus("idle"); setMessage(""); }}
               placeholder="Your name or phone number"
-              className="flex-1 bg-white border-b-2 border-dashed border-emerald-300 focus:border-emerald-500 placeholder-emerald-400/70 text-slate-900 text-sm font-semibold px-2 py-1.5 focus:outline-none rounded-none"
+              className="field flex-1 h-10 text-sm"
               disabled={status === "loading"}
               onKeyDown={(e) => e.key === "Enter" && handleEnable()}
             />
             <button
               onClick={handleEnable}
               disabled={status === "loading"}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold rounded-sm shadow-[2px_2px_0px_rgba(0,0,0,0.15)] hover:shadow-[3px_3px_0px_rgba(0,0,0,0.2)] transition-all disabled:opacity-60 shrink-0"
+              className="btn btn-teal btn-sm shrink-0"
             >
               {status === "loading" ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -133,8 +130,8 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
 
           {/* Error / denied message */}
           {(status === "error" || status === "denied" || status === "unsupported") && (
-            <p className="mt-2 text-[12px] font-semibold text-rose-700 flex items-center gap-1">
-              <BellOff className="w-3.5 h-3.5 shrink-0" />
+            <p className="mt-2 text-xs font-medium text-coral-deep flex items-start gap-1.5">
+              <BellOff className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               {message}
             </p>
           )}

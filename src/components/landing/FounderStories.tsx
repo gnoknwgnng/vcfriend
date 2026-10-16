@@ -1,69 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
-
-const COLORS = [
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "-rotate-1",
-    divider: "border-slate-200",
-  },
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "rotate-[1.2deg]",
-    divider: "border-slate-200",
-  },
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "-rotate-[0.6deg]",
-    divider: "border-slate-200",
-  },
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "rotate-[1.5deg]",
-    divider: "border-slate-200",
-  },
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "-rotate-1",
-    divider: "border-slate-200",
-  },
-  {
-    card: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    title: "text-slate-900",
-    text: "text-slate-700",
-    badge: "bg-slate-100 text-slate-800 border-slate-300",
-    tag: "text-slate-500",
-    rotate: "rotate-[0.8deg]",
-    divider: "border-slate-200",
-  },
-];
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { Reveal, RevealGroup, SplitWords } from "@/components/ui/Reveal";
 
 const stories = [
   {
@@ -117,124 +57,85 @@ const stories = [
 ];
 
 export function FounderStories() {
-  return (
-    <section className="w-full py-24 border-y border-emerald-500/20 relative overflow-hidden">
-      <div className="container px-4 md:px-6 relative z-10">
+  const [open, setOpen] = useState<number | null>(null);
 
-        {/* Chalk heading */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-sm font-semibold chalk-text mb-5"
-            style={{ fontFamily: "var(--font-caveat), cursive", color: "#fbbf24" }}
-          >
-            Big Things Start Small
-          </motion.div>
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 chalk-heading">
-            Every giant faced{" "}
-            <span style={{ color: "#fbbf24", textShadow: "0 0 10px rgba(251,191,36,0.6), 0 0 20px rgba(251,191,36,0.3)" }}>
-              extinction.
-            </span>
-          </h2>
-          <p className="chalk-text text-xl max-w-3xl mx-auto font-medium leading-relaxed">
-            Behind every trillion-dollar valuation is a story of bankruptcy, rejection, and sheer survival. Don't quit.
-          </p>
+  return (
+    <section className="w-full py-20 md:py-28 bg-mist">
+      <div className="shell">
+        <div className="max-w-2xl mb-12 md:mb-16">
+          <Reveal effect="fade"><span className="tag tag-coral">Big things start small</span></Reveal>
+          <SplitWords
+            text="Every giant faced extinction."
+            className="mt-4 text-4xl md:text-5xl font-bold text-ink leading-[1.05]"
+          />
+          <Reveal delay={0.2}>
+            <p className="mt-4 text-lg text-ink-soft leading-relaxed">
+              Behind every trillion-dollar valuation is a story of bankruptcy, rejection, and sheer
+              survival. Don&apos;t quit.
+            </p>
+          </Reveal>
         </div>
 
-        {/* Sticky Note Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <RevealGroup className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.09} effect="scale">
           {stories.map((story, idx) => {
-            const c = COLORS[idx % COLORS.length];
+            const isOpen = open === idx;
             return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 50, scale: 0.92 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-5% 0px" }}
-                transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.04, zIndex: 20 }}
-                 className={`
-                  group relative flex flex-col pl-6 pt-6 pb-6 pr-20 md:pr-24 rounded-sm border-2 cursor-interactive
-                  shadow-[5px_5px_18px_rgba(0,0,0,0.25)] hover:shadow-[0_28px_70px_rgba(0,0,0,0.3)]
-                  ${c.card} ${c.rotate}
-                  transition-shadow duration-300
-                `}
-                style={{ fontFamily: "var(--font-caveat), cursive", willChange: "transform" }}
+              <article
+                key={story.name}
+                className="surface surface-hover overflow-hidden flex flex-col group"
               >
-                {/* Pin */}
-                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full ${c.pin} shadow-md border-2 border-white/80 z-10`} />
-
-                {/* Tape strip */}
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-14 h-6 bg-white/40 backdrop-blur-sm rounded-sm border border-white/50 shadow-sm" />
-
-                {/* Lined paper texture */}
-                <div
-                  className="absolute inset-0 rounded-sm pointer-events-none opacity-[0.07]"
-                  style={{
-                    backgroundImage: "repeating-linear-gradient(transparent, transparent 26px, rgba(0,0,0,0.5) 26px, rgba(0,0,0,0.5) 27px)",
-                    backgroundPositionY: "44px",
-                  }}
-                />
-
-                {/* Polaroid Photo */}
-                <div 
-                  className="absolute top-12 right-4 w-14 h-18 md:w-16 md:h-20 bg-white border border-slate-200 p-1 shadow-md rotate-[4deg] group-hover:rotate-[12deg] group-hover:scale-105 transition-all duration-300 z-10"
-                  style={{ fontFamily: "sans-serif" }}
-                >
-                  <div className="relative w-full h-[76%] overflow-hidden bg-slate-100 border-b border-slate-100">
-                    <img 
-                      src={story.image} 
-                      alt={story.founder} 
-                      className="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-300"
+                <div className="flex items-start gap-4 p-5">
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-teal-light shrink-0">
+                    <img
+                      src={story.image}
+                      alt={story.founder}
+                      className="object-cover w-full h-full grayscale group-hover:grayscale-0 scale-105 group-hover:scale-110 transition-all duration-500"
+                      loading="lazy"
                     />
                   </div>
-                  <div 
-                    className="text-[6px] text-center mt-0.5 leading-none font-bold text-slate-800 uppercase tracking-wide overflow-hidden text-ellipsis whitespace-nowrap"
-                    style={{ fontFamily: "var(--font-caveat), cursive" }}
-                  >
-                    {story.founder.split(' ')[0]}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="font-display text-xl font-semibold text-ink leading-tight truncate">
+                        {story.name}
+                      </h3>
+                      <span className="tag tag-neutral shrink-0">Est. {story.year}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-0.5">{story.founder}</p>
                   </div>
                 </div>
 
-                {/* Year badge */}
-                <div className={`self-start mb-4 mt-3 px-3 py-1 rounded-full border text-xs font-bold tracking-widest uppercase ${c.badge}`}>
-                  Est. {story.year}
-                </div>
-
-                {/* Company name */}
-                <h3 className={`text-3xl font-bold leading-tight mb-1 ${c.title}`}>
-                  {story.name}
-                </h3>
-                <p className={`text-sm font-semibold mb-4 ${c.tag}`}>
-                  {story.founder}
-                </p>
-
-                {/* Dashed divider */}
-                <div className={`border-b-2 border-dashed ${c.divider} mb-4`} />
-
-                {/* Description */}
-                <p className={`text-[15px] leading-snug flex-1 mb-3 ${c.text}`}>
+                <p className="px-5 text-[15px] leading-relaxed text-ink-soft">
                   {story.description}
                 </p>
 
-                {/* Struggle - GPU-safe opacity+translate, no max-h layout thrash */}
-                <div className={`border-l-4 pl-3 py-1 rounded-sm ${c.divider} opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-[opacity,transform] duration-300 ease-out`}>
-                  <p className={`text-[13px] leading-snug italic ${c.text}`}>
-                    💡 {story.struggle}
-                  </p>
-                </div>
+                <button
+                  onClick={() => setOpen(isOpen ? null : idx)}
+                  aria-expanded={isOpen}
+                  className="mt-4 mx-5 mb-5 inline-flex items-center justify-between gap-2 rounded-xl border border-line bg-mist px-4 py-2.5 text-sm font-medium text-teal hover:bg-teal-light transition-colors cursor-pointer"
+                >
+                  {isOpen ? "Hide how they survived" : "How they survived"}
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
 
-                {/* Hover hint */}
-                <p className={`text-[11px] mt-3 font-semibold uppercase tracking-widest group-hover:opacity-0 transition-opacity duration-200 ${c.tag}`}>
-                  Hover to reveal ↑
-                </p>
-              </motion.div>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="overflow-hidden border-t border-line bg-teal-light/60"
+                    >
+                      <p className="px-5 py-4 text-[15px] leading-relaxed text-teal-deep">
+                        {story.struggle}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </article>
             );
           })}
-        </div>
-
+        </RevealGroup>
       </div>
     </section>
   );

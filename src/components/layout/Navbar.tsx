@@ -1,63 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X, PenLine } from "lucide-react";
+
+const NAV_LINKS = [
+  { href: "/onboarding", label: "VC Firms", match: ["/onboarding", "/vcs"] },
+  { href: "/ideas", label: "Pitch Ideas", match: ["/ideas"] },
+  { href: "/schemes", label: "Govt Schemes", match: ["/schemes"] },
+];
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 12);
+      // Tuck the bar away when scrolling down past the first screen, bring it back on any upward scroll.
+      if (y > 160 && y > last + 4) setHidden(true);
+      else if (y < last - 4 || y <= 160) setHidden(false);
+      last = y;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Always show the bar when the drawer is open
+  useEffect(() => { if (isMenuOpen) setHidden(false); }, [isMenuOpen]);
+
+  const isActive = (matches: string[]) =>
+    matches.some((m) => pathname === m || pathname?.startsWith(m + "/"));
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-emerald-500/20 bg-[#1e3a2a] shadow-[0_2px_20px_rgba(0,0,0,0.4)]">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <header
+        className={`sticky top-0 z-40 w-full transition-[background-color,box-shadow,border-color,transform] duration-300 border-b ${
+          hidden ? "-translate-y-full" : "translate-y-0"
+        } ${
+          scrolled
+            ? "bg-white/85 backdrop-blur-xl border-line shadow-[0_1px_0_rgba(15,42,51,0.04),0_8px_24px_-20px_rgba(15,42,51,0.35)]"
+            : "bg-mist/80 backdrop-blur-md border-transparent"
+        }`}
+      >
+        <div className="shell flex h-[68px] items-center justify-between gap-6">
           {/* Logo */}
-          <div className="flex gap-6 md:gap-10">
-            <Link href="/" className="flex items-center space-x-2">
-              <img 
-                src="/images/logo-transparent.png" 
-                alt="VC Friend" 
-                className="h-9 md:h-10 w-auto object-contain hover:opacity-90 transition-opacity"
-              />
-            </Link>
-            
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex gap-6">
-              <Link
-                href="/onboarding"
-                className="flex items-center text-sm font-medium text-emerald-200/70 hover:text-emerald-100 transition-colors chalk-text"
-              >
-                VC Firms
-              </Link>
-              <Link
-                href="/ideas"
-                className="flex items-center text-sm font-medium text-emerald-200/70 hover:text-emerald-100 transition-colors chalk-text"
-              >
-                Pitch Ideas
-              </Link>
-              <Link
-                href="/schemes"
-                className="flex items-center text-sm font-medium text-emerald-200/70 hover:text-emerald-100 transition-colors chalk-text"
-              >
-                Govt Schemes
-              </Link>
-            </nav>
-          </div>
+          <Link href="/" className="flex items-center shrink-0" aria-label="VC Friend home">
+            <img
+              src="/images/logo-transparent.png"
+              alt="VC Friend"
+              className="h-11 md:h-12 w-auto object-contain -my-1"
+            />
+          </Link>
 
-          {/* Right Nav / Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1 rounded-full border border-line bg-white/70 p-1">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.match);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative h-9 px-4 inline-flex items-center rounded-full text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-ink text-white"
+                      : "text-ink-soft hover:text-ink hover:bg-mist"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
             <Link
               href="/submit-review"
-              className="inline-flex items-center gap-1.5 text-[12px] md:text-sm font-bold text-emerald-200 hover:text-emerald-100 transition-colors chalk-text border border-emerald-500/30 px-2 md:px-2.5 py-1.5 rounded-sm bg-emerald-900/30 hover:bg-emerald-900/50 shadow-sm"
+              className="btn btn-sm btn-ink hidden sm:inline-flex"
             >
-              ✏️ <span className="hidden sm:inline">Write a Platform Review</span><span className="sm:hidden">Write a Review</span>
+              <PenLine className="w-4 h-4" />
+              Write a platform review
             </Link>
-            
-            {/* Hamburger Button (Mobile Only) */}
+            <Link
+              href="/submit-review"
+              className="btn btn-sm btn-ink sm:hidden px-3"
+              aria-label="Write a platform review"
+            >
+              <PenLine className="w-4 h-4" />
+            </Link>
+
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-emerald-300 hover:text-emerald-100 focus:outline-none cursor-pointer"
-              aria-label="Toggle Menu"
+              className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-line bg-white text-ink cursor-pointer"
+              aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -65,54 +108,59 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Backdrop (Mobile Only) */}
+      {/* Backdrop (mobile) */}
       {isMenuOpen && (
-        <div 
-          className="fixed inset-0 z-45 bg-black/40 backdrop-blur-sm md:hidden"
+        <div
+          className="fixed inset-0 z-45 bg-ink/40 backdrop-blur-sm md:hidden"
           onClick={() => setIsMenuOpen(false)}
         />
       )}
 
-      {/* Slide-out Mobile Drawer Menu */}
-      <div 
-        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#0d2216]/95 border-l border-emerald-500/30 backdrop-blur-md p-6 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
+      {/* Mobile drawer */}
+      <div
+        className={`fixed inset-y-0 right-0 z-50 w-[82vw] max-w-sm bg-white border-l border-line shadow-2xl transition-transform duration-300 ease-out md:hidden flex flex-col ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Close Button inside drawer */}
-        <div className="flex justify-end mb-8">
+        <div className="flex items-center justify-between px-6 h-[68px] border-b border-line">
+          <span className="font-display font-semibold text-ink">Menu</span>
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="p-1.5 text-emerald-300 hover:text-emerald-100 focus:outline-none cursor-pointer"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-line text-ink cursor-pointer"
+            aria-label="Close menu"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Mobile Navigation Links */}
-        <nav className="flex flex-col gap-5">
-          <Link
-            href="/onboarding"
-            onClick={() => setIsMenuOpen(false)}
-            className="text-base font-bold text-emerald-200 hover:text-emerald-100 transition-colors chalk-text py-2.5 border-b border-emerald-500/10"
-          >
-            VC Firms
-          </Link>
-          <Link
-            href="/ideas"
-            onClick={() => setIsMenuOpen(false)}
-            className="text-base font-bold text-emerald-200 hover:text-emerald-100 transition-colors chalk-text py-2.5 border-b border-emerald-500/10"
-          >
-            Pitch Ideas
-          </Link>
-          <Link
-            href="/schemes"
-            onClick={() => setIsMenuOpen(false)}
-            className="text-base font-bold text-emerald-200 hover:text-emerald-100 transition-colors chalk-text py-2.5 border-b border-emerald-500/10"
-          >
-            Govt Schemes
-          </Link>
+        <nav className="flex flex-col p-4 gap-1">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.match);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-base font-medium transition-colors ${
+                  active ? "bg-ink text-white" : "text-ink hover:bg-mist"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
+
+        <div className="mt-auto p-4 border-t border-line">
+          <Link
+            href="/submit-review"
+            onClick={() => setIsMenuOpen(false)}
+            className="btn btn-coral w-full"
+          >
+            <PenLine className="w-4 h-4" />
+            Write a platform review
+          </Link>
+        </div>
       </div>
     </>
   );

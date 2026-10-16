@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { ChevronLeft, PenLine } from "lucide-react";
 import { submitTestimonial } from "./actions";
 
 export default function SubmitReviewPage() {
@@ -25,45 +22,46 @@ export default function SubmitReviewPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/10 animate-fade-in">
-      <Card className="w-full max-w-2xl glass border-border/50 shadow-2xl">
-        <form onSubmit={handleSubmit}>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold tracking-tight text-center">Write a Review</CardTitle>
-            <CardDescription className="text-center text-lg">
+    <div className="flex-1 bg-mist">
+      <div className="shell py-10 md:py-16 max-w-3xl animate-fade-in">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" /> Back to home
+        </Link>
+
+        <form onSubmit={handleSubmit} className="mt-6 surface overflow-hidden">
+          <div className="p-7 md:p-10 border-b border-line">
+            <div className="w-12 h-12 rounded-2xl bg-coral-light text-coral-deep flex items-center justify-center mb-5">
+              <PenLine className="w-5.5 h-5.5" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-ink leading-tight">Write a review</h1>
+            <p className="mt-2 text-base md:text-lg text-ink-soft">
               Did VC Friend help you navigate the fundraising landscape? Share your experience with the community!
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 mt-4">
-            
+            </p>
+          </div>
+
+          <div className="p-7 md:p-10 space-y-6">
             {errorMsg && (
-              <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
-                ❌ {errorMsg}
+              <div className="notice notice-error" role="alert">
+                {errorMsg}
               </div>
             )}
-            
-            <div className="space-y-2">
-              <label htmlFor="authorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Your Name & Company (Optional)
-              </label>
-              <Input 
+
+            <div>
+              <label htmlFor="authorName" className="field-label">Your name & company (optional)</label>
+              <input
                 id="authorName"
-                name="authorName" 
-                placeholder="e.g. Jane Doe, Founder @ StartupX" 
-                className="bg-background/50 text-base py-6"
+                name="authorName"
+                placeholder="e.g. Jane Doe, Founder @ StartupX"
+                className="field"
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="rating" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Rating
-              </label>
-              <select 
-                id="rating"
-                name="rating" 
-                className="flex h-12 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                defaultValue="5"
-              >
+            <div>
+              <label htmlFor="rating" className="field-label">Rating</label>
+              <select id="rating" name="rating" className="field" defaultValue="5">
                 <option value="5">⭐⭐⭐⭐⭐ (5/5) - Excellent</option>
                 <option value="4">⭐⭐⭐⭐ (4/5) - Great</option>
                 <option value="3">⭐⭐⭐ (3/5) - Good</option>
@@ -72,30 +70,28 @@ export default function SubmitReviewPage() {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="content" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Your Review
-              </label>
-              <Textarea 
+            <div>
+              <label htmlFor="content" className="field-label">Your review</label>
+              <textarea
                 id="content"
-                name="content" 
-                placeholder="How did VC Friend help you? What did you like about it?" 
-                className="min-h-[150px] bg-background/50 resize-y text-base p-4"
+                name="content"
+                placeholder="How did VC Friend help you? What did you like about it?"
+                className="field min-h-[160px]"
                 required
               />
             </div>
+          </div>
 
-          </CardContent>
-          <CardFooter className="flex flex-col sm:flex-row gap-4 justify-end mt-4 pb-8">
-            <Link href="/" className={buttonVariants({ variant: "ghost", className: "w-full sm:w-auto h-12" })}>
+          <div className="px-7 md:px-10 py-6 bg-mist/70 border-t border-line flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+            <Link href="/" className="btn btn-ghost">
               Cancel
             </Link>
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto text-base h-12 rounded-full font-semibold px-8">
-              {isLoading ? "Submitting..." : "Submit Review"}
-            </Button>
-          </CardFooter>
+            <button type="submit" disabled={isLoading} className="btn btn-coral">
+              {isLoading ? "Submitting..." : "Submit review"}
+            </button>
+          </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }

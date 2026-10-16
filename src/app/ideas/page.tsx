@@ -2,9 +2,10 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import { LinkifyText } from "@/components/LinkifyText";
-import { ChevronLeft, MessageSquareQuote } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareQuote, Flame, Phone } from "lucide-react";
 import { MobilePitchModal } from "./MobilePitchModal";
 import { DesktopPitchForm } from "./DesktopPitchForm";
+import { Reveal, RevealGroup } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "Startup Pitch & Fundraiser Ideas Feed - VC Friend",
@@ -37,153 +38,120 @@ export default async function IdeaFeedPage({
   const totalCount = count || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-  const PITCH_COLORS = [
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "-rotate-[0.5deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "rotate-[0.8deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "-rotate-[0.8deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "rotate-[0.6deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "-rotate-[0.4deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-    { card: "bg-white border-slate-200/90", pin: "bg-red-400", title: "text-slate-900", text: "text-slate-700", tag: "text-slate-500", divider: "border-slate-200", rotate: "rotate-[0.8deg]", badge: "bg-slate-100 text-slate-800 border-slate-300" },
-  ];
-
   return (
     <>
-      <div className="container mx-auto px-4 py-8 max-w-6xl animate-fade-in">
-        <div className="mb-6" style={{ fontFamily: "var(--font-caveat), cursive" }}>
-          <Link 
-            href="/" 
-            className="inline-flex items-center text-lg font-bold text-emerald-200 hover:text-emerald-100 transition-colors"
+      <div className="flex-1 bg-mist">
+        <div className="shell py-10 md:py-14 animate-fade-in">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm font-medium text-ink-soft hover:text-ink transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 mr-1" /> Back to Home
+            <ChevronLeft className="w-4 h-4" /> Back to home
           </Link>
-        </div>
-        
-        <div className="mb-12 text-center lg:text-left">
-          <h1 className="chalk-heading text-4xl md:text-5xl font-bold tracking-tight mb-2">Community Pitches</h1>
-          <p className="chalk-text text-xl">Explore startup ideas or drop your own to get instant feedback.</p>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-          {/* Idea Feed (Top on mobile, Left on desktop) */}
-          <div className="lg:col-span-2 space-y-8 order-1">
-            <h2 className="chalk-heading text-2xl font-bold tracking-tight mb-4">Recent Pitches</h2>
-            
-            {!ideas || ideas.length === 0 ? (
-              <div className="text-center py-12 chalk-text text-2xl border-2 border-dashed border-emerald-500/20 rounded-sm">
-                <p>No ideas pitched yet. Be the first!</p>
+          <Reveal className="mt-6 mb-10 max-w-2xl">
+            <h1 className="text-4xl md:text-5xl font-bold text-ink leading-[1.05]">Community pitches</h1>
+            <p className="mt-3 text-base md:text-lg text-ink-soft">
+              Explore startup ideas or drop your own to get instant feedback.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Idea Feed (Top on mobile, Left on desktop) */}
+            <div className="lg:col-span-2 order-1">
+              <div className="flex items-baseline justify-between mb-5">
+                <h2 className="text-xl font-semibold text-ink">Recent pitches</h2>
+                <span className="text-sm text-muted-foreground tabular-nums">{totalCount.toLocaleString()} total</span>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {ideas.map((idea, index) => {
-                  const c = PITCH_COLORS[index % PITCH_COLORS.length];
-                  const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
-                  return (
-                    <div 
-                      key={idea.id}
-                      className={`
-                        relative flex flex-col p-6 rounded-sm border-2 cursor-interactive
-                        shadow-[4px_4px_14px_rgba(0,0,0,0.22)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.25)]
-                        ${c.card} ${c.rotate}
-                        transition-shadow duration-300
-                      `}
-                      style={{ fontFamily: "var(--font-caveat), cursive", willChange: "transform" }}
-                    >
-                      {/* VC Reviewed Badge */}
-                      {hasVCReview && (
-                        <div className="absolute top-2 right-3 bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-sm z-20">
-                          🔥 VC Reviewed
-                        </div>
-                      )}
-                      {/* Pin */}
-                      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full ${c.pin} shadow-md border-2 border-white/80 z-10`} />
-                      {/* Tape */}
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-white/40 rounded-sm border border-white/50 shadow-sm" />
-                      {/* Lined paper texture */}
-                      <div
-                        className="absolute inset-0 rounded-sm pointer-events-none opacity-[0.06]"
-                        style={{
-                          backgroundImage: "repeating-linear-gradient(transparent, transparent 26px, rgba(0,0,0,0.5) 26px, rgba(0,0,0,0.5) 27px)",
-                          backgroundPositionY: "44px",
-                        }}
-                      />
 
-                      {/* Header info */}
-                      <div className="flex items-center gap-3 mb-4 mt-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border ${c.badge}`}>
-                          {(idea.authorName?.[0] || 'A').toUpperCase()}
-                        </div>
-                        <div>
-                          <div className={`font-bold text-sm leading-none ${c.title}`}>{idea.authorName || "Anonymous Founder"}</div>
-                          <div className={`text-[11px] font-semibold mt-1 uppercase ${c.tag}`}>
-                            {idea.createdAt ? formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true }) : 'Just now'}
+              {!ideas || ideas.length === 0 ? (
+                <div className="surface text-center py-16 px-6">
+                  <p className="text-lg font-medium text-ink">No ideas pitched yet.</p>
+                  <p className="mt-1 text-ink-soft">Be the first — the form is right here.</p>
+                </div>
+              ) : (
+                <RevealGroup className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start" stagger={0.07}>
+                  {ideas.map((idea) => {
+                    const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
+                    const name = idea.authorName || "Anonymous Founder";
+                    return (
+                      <article key={idea.id} className="surface surface-hover p-6 flex flex-col">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-full bg-teal-light text-teal-deep flex items-center justify-center font-semibold text-sm shrink-0">
+                              {(idea.authorName?.[0] || 'A').toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-sm text-ink truncate">{name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {idea.createdAt ? formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true }) : 'Just now'}
+                              </div>
+                            </div>
                           </div>
+                          {hasVCReview && (
+                            <span className="tag tag-coral shrink-0">
+                              <Flame className="w-3.5 h-3.5" /> VC reviewed
+                            </span>
+                          )}
                         </div>
-                      </div>
 
-                      {/* Contact Info (if available) */}
-                      {idea.contactInfo && (
-                        <div className={`text-xs font-bold px-2 py-1 rounded-sm border border-current/20 self-start mb-3 ${c.tag}`}>
-                          📞 {idea.contactInfo}
+                        {idea.contactInfo && (
+                          <span className="tag tag-outline self-start mt-4">
+                            <Phone className="w-3.5 h-3.5" /> {idea.contactInfo}
+                          </span>
+                        )}
+
+                        <div className="mt-4 text-[15px] leading-relaxed text-ink-soft flex-1">
+                          <LinkifyText text={idea.content} />
                         </div>
-                      )}
 
-                      {/* Content */}
-                      <div className={`text-[16px] leading-relaxed flex-grow mb-4 ${c.text}`}>
-                        <LinkifyText text={idea.content} />
-                      </div>
+                        <Link
+                          href={`/ideas/${idea.id}`}
+                          className="mt-5 pt-4 border-t border-line inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:text-coral transition-colors"
+                        >
+                          <MessageSquareQuote className="w-4 h-4" />
+                          View feedback & discuss
+                        </Link>
+                      </article>
+                    );
+                  })}
+                </RevealGroup>
+              )}
 
-                      {/* Dashed divider */}
-                      <div className={`border-b-2 border-dashed ${c.divider} mb-3`} />
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <nav className="flex justify-center items-center gap-3 mt-10 pt-8 border-t border-line" aria-label="Pagination">
+                  {page > 1 ? (
+                    <Link href={`/ideas?page=${page - 1}`} className="btn btn-ghost btn-sm">
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </Link>
+                  ) : (
+                    <span className="btn btn-ghost btn-sm opacity-40 pointer-events-none">
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </span>
+                  )}
 
-                      {/* Footer discussion link */}
-                      <Link 
-                        href={`/ideas/${idea.id}`}
-                        className={`flex items-center gap-1.5 text-sm font-bold mt-auto ${c.tag} hover:underline`}
-                      >
-                        <MessageSquareQuote className="w-4 h-4" />
-                        View Feedback & Discuss
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                  <span className="text-sm font-medium text-ink-soft px-3 tabular-nums">
+                    Page {page} of {totalPages}
+                  </span>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-6 mt-12 pt-6 border-t border-emerald-500/20" style={{ fontFamily: "var(--font-caveat), cursive" }}>
-                {page > 1 ? (
-                  <Link 
-                    href={`/ideas?page=${page - 1}`}
-                    className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 font-bold text-lg"
-                  >
-                    Previous
-                  </Link>
-                ) : (
-                  <span className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-500/10 text-emerald-500/40 font-bold text-lg cursor-not-allowed">Previous</span>
-                )}
-                
-                <span className="text-xl font-bold chalk-text">
-                  Page {page} of {totalPages}
-                </span>
+                  {page < totalPages ? (
+                    <Link href={`/ideas?page=${page + 1}`} className="btn btn-ghost btn-sm">
+                      Next <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <span className="btn btn-ghost btn-sm opacity-40 pointer-events-none">
+                      Next <ChevronRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </nav>
+              )}
+            </div>
 
-                {page < totalPages ? (
-                  <Link 
-                    href={`/ideas?page=${page + 1}`}
-                    className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 font-bold text-lg"
-                  >
-                    Next
-                  </Link>
-                ) : (
-                  <span className="flex items-center justify-center px-4 py-2 rounded-sm border-2 border-emerald-500/10 text-emerald-500/40 font-bold text-lg cursor-not-allowed">Next</span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Submit Idea Form (Desktop only) */}
-          <div id="pitch-form" className="hidden lg:block lg:col-span-1 order-2 lg:sticky lg:top-24 lg:self-start mt-4 lg:mt-0">
-            <DesktopPitchForm />
+            {/* Submit Idea Form (Desktop only) */}
+            <Reveal effect="slide-right" delay={0.2} className="hidden lg:block lg:col-span-1 order-2 lg:sticky lg:top-24 lg:self-start">
+              <div id="pitch-form"><DesktopPitchForm /></div>
+            </Reveal>
           </div>
         </div>
       </div>

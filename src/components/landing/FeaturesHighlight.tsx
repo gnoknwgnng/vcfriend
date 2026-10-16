@@ -1,148 +1,114 @@
 "use client";
 
-import { Search, Lightbulb, ShieldCheck, BarChart3, Users } from "lucide-react";
-import { TextReveal } from "@/components/ui/TextReveal";
-import { RevealOnScroll } from "@/components/ui/ScrollAnimations";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { Search, Lightbulb, ShieldCheck, BarChart3, Users, ArrowUpRight } from "lucide-react";
+import { Reveal, RevealGroup, SplitWords } from "@/components/ui/Reveal";
 
 const FEATURES = [
   {
     icon: Search,
-    title: "Discover Investors",
+    title: "Discover investors",
     description:
       "Filter through thousands of VC firms by stage, sector, and check size. Stop guessing and find the perfect match for your startup's current trajectory.",
-    color: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    titleColor: "text-slate-900",
-    textColor: "text-slate-700",
-    iconBg: "bg-slate-100 text-slate-700",
-    rotate: "-rotate-1",
-    size: "md:col-span-2 md:row-span-1",
+    href: "/onboarding",
+    cta: "Browse the directory",
+    tone: "teal",
+    span: "md:col-span-7",
   },
   {
     icon: Lightbulb,
-    title: "Pitch Anonymously",
+    title: "Pitch anonymously",
     description:
       "Share your startup ideas safely with a community of verified founders and investors. Get instant, honest feedback without risking your reputation.",
-    badge: "100% Identity Protection",
+    badge: "100% identity protection",
     badgeIcon: ShieldCheck,
-    color: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    titleColor: "text-slate-900",
-    textColor: "text-slate-700",
-    iconBg: "bg-slate-100 text-slate-700",
-    rotate: "rotate-[1.5deg]",
-    size: "md:col-span-1 md:row-span-2",
+    href: "/ideas",
+    cta: "Pitch an idea",
+    tone: "coral",
+    span: "md:col-span-5",
   },
   {
     icon: BarChart3,
-    title: "Market Data",
-    description:
-      "Real-time insights on which sectors are actively receiving funding right now.",
-    color: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    titleColor: "text-slate-900",
-    textColor: "text-slate-700",
-    iconBg: "bg-slate-100 text-slate-700",
-    rotate: "rotate-1",
-    size: "md:col-span-1 md:row-span-1",
+    title: "Market data",
+    description: "Real-time insights on which sectors are actively receiving funding right now.",
+    href: "/vcs",
+    cta: "See active firms",
+    tone: "lavender",
+    span: "md:col-span-5",
   },
   {
     icon: Users,
-    title: "Founder Network",
-    description:
-      "Connect directly with peers navigating the exact same fundraising journey.",
-    color: "bg-white border-slate-200/90",
-    pin: "bg-red-400",
-    titleColor: "text-slate-900",
-    textColor: "text-slate-700",
-    iconBg: "bg-slate-100 text-slate-700",
-    rotate: "-rotate-[0.8deg]",
-    size: "md:col-span-1 md:row-span-1",
+    title: "Founder network",
+    description: "Connect directly with peers navigating the exact same fundraising journey.",
+    href: "/ideas",
+    cta: "Join the conversation",
+    tone: "teal",
+    span: "md:col-span-7",
   },
 ];
 
+const TONES: Record<string, { icon: string; glow: string }> = {
+  teal: { icon: "bg-teal-light text-teal-deep", glow: "from-teal-light" },
+  coral: { icon: "bg-coral-light text-coral-deep", glow: "from-coral-light" },
+  lavender: { icon: "bg-lavender-light text-[#5e4580]", glow: "from-lavender-light" },
+};
+
 export function FeaturesHighlight() {
   return (
-    <section className="w-full py-24 border-y border-emerald-500/20 relative overflow-hidden">
-      <div className="container px-4 md:px-6 relative z-10">
-        {/* Chalk-written heading */}
-        <div className="text-center mb-16">
-          <TextReveal
+    <section className="w-full py-20 md:py-28 bg-white border-y border-line">
+      <div className="shell">
+        <div className="max-w-2xl mb-12 md:mb-16">
+          <SplitWords
             text="A complete toolkit for fundraising."
-            className="text-4xl md:text-6xl font-bold tracking-tight mb-6 chalk-heading justify-center"
+            className="text-4xl md:text-5xl font-bold text-ink leading-[1.05]"
           />
-          <RevealOnScroll delay={0.2}>
-            <p className="chalk-text text-xl max-w-2xl mx-auto font-medium">
+          <Reveal delay={0.2}>
+            <p className="mt-4 text-lg text-ink-soft leading-relaxed">
               Everything you need to navigate the ecosystem, neatly organized in one place.
             </p>
-          </RevealOnScroll>
+          </Reveal>
         </div>
 
-        {/* Sticky Note Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
           {FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
             const BadgeIcon = feature.badgeIcon;
+            const tone = TONES[feature.tone];
             return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 50, scale: 0.92 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-5% 0px" }}
-                transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.04, rotate: 0, zIndex: 20, boxShadow: "0 24px 60px rgba(0,0,0,0.25)" }}
-                className={`
-                  relative flex flex-col p-7 rounded-sm border-2 cursor-interactive
-                  shadow-[5px_5px_18px_rgba(0,0,0,0.25)]
-                  ${feature.color} ${feature.rotate} ${feature.size}
-                  transition-[box-shadow] duration-300
-                `}
-                style={{ fontFamily: "var(--font-caveat), cursive" }}
+              <Reveal
+                key={feature.title}
+                effect={idx % 2 === 0 ? "slide-left" : "slide-right"}
+                delay={(idx % 2) * 0.1}
+                className={`${feature.span} group relative overflow-hidden rounded-3xl border border-line bg-mist p-7 md:p-8 flex flex-col surface-hover`}
               >
-                {/* Pin */}
-                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full ${feature.pin} shadow-md border-2 border-white/80 z-10`} />
-
-                {/* Tape strip */}
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-14 h-6 bg-white/40 backdrop-blur-sm rounded-sm border border-white/50 shadow-sm" />
-
-                {/* Lined paper texture */}
                 <div
-                  className="absolute inset-0 rounded-sm pointer-events-none opacity-[0.08]"
-                  style={{
-                    backgroundImage: "repeating-linear-gradient(transparent, transparent 26px, rgba(0,0,0,0.5) 26px, rgba(0,0,0,0.5) 27px)",
-                    backgroundPositionY: "42px",
-                  }}
+                  className={`pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br ${tone.glow} to-transparent opacity-70 transition-transform duration-700 group-hover:scale-125`}
                 />
-
-                {/* Icon */}
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 mt-3 shadow-sm ${feature.iconBg}`}>
-                  <Icon className="h-6 w-6" />
+                <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105 ${tone.icon}`}>
+                  <Icon className="h-5.5 w-5.5" />
                 </div>
 
-                {/* Title */}
-                <h3 className={`text-2xl font-bold mb-3 leading-tight ${feature.titleColor}`}>
-                  {feature.title}
-                </h3>
-
-                {/* Dashed divider */}
-                <div className="border-b-2 border-dashed border-current/20 mb-3" />
-
-                {/* Description */}
-                <p className={`text-base leading-relaxed flex-1 ${feature.textColor}`}>
+                <h3 className="relative mt-6 text-2xl font-semibold text-ink">{feature.title}</h3>
+                <p className="relative mt-3 text-[15px] md:text-base leading-relaxed text-ink-soft flex-1 max-w-prose">
                   {feature.description}
                 </p>
 
-                {/* Optional badge */}
-                {feature.badge && BadgeIcon && (
-                  <div className="mt-5 pt-4 border-t-2 border-dashed border-current/20">
-                    <div className="flex items-center gap-2">
-                      <BadgeIcon className="h-4 w-4 text-sky-600 shrink-0" />
-                      <span className="text-sm font-bold text-sky-800">{feature.badge}</span>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+                <div className="relative mt-6 flex items-center justify-between gap-4 flex-wrap">
+                  <Link
+                    href={feature.href}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:text-coral transition-colors"
+                  >
+                    {feature.cta}
+                    <ArrowUpRight className="w-4 h-4" />
+                  </Link>
+                  {feature.badge && BadgeIcon && (
+                    <span className="tag tag-teal">
+                      <BadgeIcon className="h-3.5 w-3.5" />
+                      {feature.badge}
+                    </span>
+                  )}
+                </div>
+              </Reveal>
             );
           })}
         </div>

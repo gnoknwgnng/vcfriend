@@ -157,17 +157,17 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 font-sans">
-        <div className="max-w-md w-full space-y-6 bg-white border border-slate-200/80 p-8 rounded-xl shadow-xl animate-fade-in text-center">
+      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-mist font-sans">
+        <div className="max-w-md w-full space-y-6 surface p-8 animate-fade-in text-center">
           <div className="space-y-4">
-            <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
-              <ShieldCheck className="w-7 h-7 text-emerald-600" />
+            <div className="mx-auto w-14 h-14 rounded-full bg-teal-light flex items-center justify-center">
+              <ShieldCheck className="w-7 h-7 text-teal-deep" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+              <h2 className="text-2xl font-bold text-ink">
                 Investor Access Portal
               </h2>
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-muted-foreground text-sm mt-1">
                 Please enter the passcode to access the reviews & highlights board.
               </p>
             </div>
@@ -177,15 +177,15 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 placeholder="Enter password..."
-                className="flex h-12 w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-800 px-3 py-2 text-center text-lg focus:outline-none focus:border-emerald-500 shadow-inner font-semibold transition-colors"
+                className="field text-center text-lg font-semibold"
                 required
               />
               {authError && (
-                <p className="text-rose-500 text-sm font-semibold">{authError}</p>
+                <p className="text-coral-deep text-sm font-medium">{authError}</p>
               )}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center px-4 h-12 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-sm hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer"
+                className="btn btn-coral w-full"
               >
                 Unlock Portal
               </button>
@@ -197,27 +197,27 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-mist text-ink font-sans py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         
         {/* Page Header */}
-        <div className="border-b border-slate-200 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="border-b border-line pb-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink">
               Investor Admin Dashboard
             </h1>
-            <p className="text-slate-500 text-xs sm:text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Sleek control center to filter startup pitches, post verified VC reviews, and highlight selected ideas.
             </p>
           </div>
           
           {/* Quick Info & Log Out */}
           <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-            <div className="bg-white border border-slate-200/80 rounded-lg px-3 py-2 flex items-center gap-2.5 shadow-sm">
-              <Building className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
+            <div className="surface px-3 py-2 flex items-center gap-2.5">
+              <Building className="w-4 h-4 sm:w-5 sm:h-5 text-teal shrink-0" />
               <div className="min-w-0">
-                <span className="block text-[9px] sm:text-xs text-slate-400 leading-none">Logged in as</span>
-                <span className="text-xs sm:text-sm font-bold text-slate-700 mt-1 block truncate max-w-[120px] sm:max-w-none">
+                <span className="block text-[9px] sm:text-xs text-muted-foreground leading-none">Logged in as</span>
+                <span className="text-xs sm:text-sm font-semibold text-ink mt-1 block truncate max-w-[120px] sm:max-w-none">
                   {vcName || "VC Partner"}
                 </span>
               </div>
@@ -225,7 +225,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
             
             <button
               onClick={handleLogOut}
-              className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-lg px-3 py-2 text-xs sm:text-sm font-bold shadow-sm transition-all duration-200 flex items-center gap-1.5 cursor-pointer h-[38px] sm:h-[46px] shrink-0"
+              className="bg-coral-light hover:bg-[#f9d9d0] text-coral-deep border border-[#f3c4b8] rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer h-[38px] sm:h-[46px] shrink-0"
               title="Log Out"
             >
               <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -237,45 +237,45 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         {/* KPI Cards / Statistics Panel */}
         <div className="grid grid-cols-3 gap-2 sm:gap-6 mb-6">
           {/* Metric 1 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
-              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+          <div className="surface p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-teal-light flex items-center justify-center shrink-0 mb-1.5 sm:mb-0">
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-teal-deep" />
             </div>
             <div>
-              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block font-display text-lg sm:text-2xl font-bold text-ink leading-none">
                 {ideas.length}
               </span>
-              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+              <span className="text-[11px] sm:text-xs text-muted-foreground mt-1 block">
                 Pitches
               </span>
             </div>
           </div>
 
           {/* Metric 2 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
-              <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+          <div className="surface p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-coral-light flex items-center justify-center shrink-0 mb-1.5 sm:mb-0">
+              <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-coral-deep" />
             </div>
             <div>
-              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block font-display text-lg sm:text-2xl font-bold text-ink leading-none">
                 {Object.keys(sectorCounts).length}
               </span>
-              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+              <span className="text-[11px] sm:text-xs text-muted-foreground mt-1 block">
                 Sectors
               </span>
             </div>
           </div>
 
           {/* Metric 3 */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 shadow-sm text-center sm:text-left">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 shadow-sm mb-1.5 sm:mb-0">
-              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-sky-600" />
+          <div className="surface p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:gap-5 text-center sm:text-left">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-lavender-light flex items-center justify-center shrink-0 mb-1.5 sm:mb-0">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-[#5e4580]" />
             </div>
             <div>
-              <span className="block text-lg sm:text-2xl font-extrabold text-slate-900 leading-none">
+              <span className="block font-display text-lg sm:text-2xl font-bold text-ink leading-none">
                 {filteredIdeas.length}
               </span>
-              <span className="text-[9px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+              <span className="text-[11px] sm:text-xs text-muted-foreground mt-1 block">
                 Matches
               </span>
             </div>
@@ -283,20 +283,19 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         </div>
 
         {/* Filter and Search Bar Section */}
-        <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="surface p-4 sm:p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Sector Filter Dropdown */}
           <div className="flex items-center gap-2.5 w-full md:w-auto">
-            <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 shrink-0" />
+            <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
             <div className="relative flex-1 md:w-64">
               <select
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
-                style={{ backgroundImage: 'url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', backgroundRepeat: 'no-repeat' }}
+                className="field h-11 text-sm"
               >
                 {uniqueSectors.map((sector) => (
-                  <option key={sector} value={sector} className="bg-white text-slate-700">
+                  <option key={sector} value={sector} className="bg-white text-ink">
                     {sector === "All Sectors" ? "All Sectors" : `${sector} (${sectorCounts[sector] || 0})`}
                   </option>
                 ))}
@@ -312,9 +311,9 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by author or keywords..."
-                className="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 shadow-inner transition-colors"
+                className="field h-11 text-sm pl-10"
               />
-              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
         </div>
@@ -322,8 +321,8 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
         {/* Grid of Pitches */}
         <div className="space-y-6">
           {filteredIdeas.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-slate-200 rounded-xl bg-slate-100/40 animate-fade-in">
-              <p className="text-slate-500 text-lg">No pitches match your current filter settings.</p>
+            <div className="text-center py-20 border border-dashed border-line rounded-2xl bg-white/60 animate-fade-in">
+              <p className="text-ink-soft text-lg">No pitches match your current filter settings.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -332,13 +331,13 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                 return (
                   <div 
                     key={idea.id}
-                    className="flex flex-col p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-300"
+                    className="surface surface-hover flex flex-col p-6"
                   >
                     {/* Card Header */}
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <div className="flex items-center justify-between border-b border-line pb-3 mb-4">
                       <div>
-                        <span className="font-bold text-sm text-slate-900">{idea.authorName || "Anonymous Founder"}</span>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
+                        <span className="font-semibold text-sm text-ink">{idea.authorName || "Anonymous Founder"}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
                         </div>
@@ -346,28 +345,28 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                     </div>
 
                     {/* Pitch Content */}
-                    <p className="text-slate-600 text-[14px] leading-relaxed mb-4 flex-grow font-normal">
+                    <p className="text-ink-soft text-[14px] leading-relaxed mb-4 flex-grow">
                       {idea.content}
                     </p>
 
                     {/* Auto-Classified Sector Tag & Contact Info */}
                     <div className="mb-5 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold uppercase bg-slate-50 border border-slate-100 text-slate-600">
-                        <Tag className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="tag tag-lavender">
+                        <Tag className="w-3.5 h-3.5 " />
                         Sector: {idea.sector}
                       </span>
                       {idea.contactInfo && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-700 select-all" title="Click to copy contact info">
+                        <span className="tag tag-outline select-all" title="Click to copy contact info">
                           Contact: {idea.contactInfo}
                         </span>
                       )}
                     </div>
 
                     {/* VC Review Editor - Professional SaaS Form style */}
-                    <div className="pt-4 border-t border-slate-100 space-y-4 mt-auto">
-                      <div className="flex items-center gap-1.5 text-slate-500">
-                        <Award className="w-4 h-4 text-emerald-600" />
-                        <span className="text-xs font-bold uppercase tracking-wider">
+                    <div className="pt-4 border-t border-line space-y-3 mt-auto">
+                      <div className="flex items-center gap-1.5 text-ink-soft">
+                        <Award className="w-4 h-4 text-teal-deep" />
+                        <span className="text-xs font-semibold">
                           Post Verified VC Feedback
                         </span>
                       </div>
@@ -379,7 +378,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                           value={vcName}
                           onChange={(e) => handleVcNameChange(e.target.value)}
                           placeholder="Your VC Firm Name (e.g. Sequoia Capital)"
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 text-slate-800 rounded-lg text-sm px-3 py-2 focus:outline-none transition-colors"
+                          className="field h-11 text-sm"
                           required
                         />
                       </div>
@@ -390,19 +389,19 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                           value={activeReviews[idea.id] || ""}
                           onChange={(e) => setActiveReviews(prev => ({ ...prev, [idea.id]: e.target.value }))}
                           placeholder="Enter professional feedback to highlight this pitch..."
-                          className="w-full min-h-[90px] bg-slate-50 border border-slate-200 focus:border-emerald-500 text-slate-800 rounded-lg text-sm p-3 focus:outline-none resize-none transition-colors"
+                          className="field min-h-[90px] text-sm resize-none"
                           required
                         />
                       </div>
 
                       {/* Status Alerts */}
                       {reviewState.error && (
-                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-600 font-medium animate-fade-in">
+                        <div className="notice notice-error animate-fade-in">
                           ❌ {reviewState.error}
                         </div>
                       )}
                       {reviewState.success && (
-                        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-600 font-medium animate-fade-in">
+                        <div className="notice notice-success animate-fade-in">
                           ✅ Review submitted and highlighted!
                         </div>
                       )}
@@ -410,7 +409,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                       <button
                         onClick={() => handleReviewSubmit(idea.id)}
                         disabled={reviewState.loading}
-                        className="w-full mt-1 inline-flex items-center justify-center px-4 h-10 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-sm hover:shadow-emerald-500/10 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn btn-sm btn-teal w-full mt-1"
                       >
                         {reviewState.loading ? "Posting..." : "Post Highlighted Review"}
                       </button>

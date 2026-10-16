@@ -33,7 +33,7 @@ export default async function GovernmentSchemesPage() {
   };
 
   return (
-    <main className="flex-1 flex flex-col min-h-screen bg-book-texture">
+    <main className="flex-1 flex flex-col min-h-screen bg-mist">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}

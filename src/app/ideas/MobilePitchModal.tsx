@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { X, Plus, Rocket, AlertTriangle } from "lucide-react";
 import { submitIdea } from "./actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationOptIn } from "./NotificationOptIn";
@@ -37,112 +33,113 @@ export function MobilePitchModal() {
   return (
     <>
       {/* Mobile Floating Action Button */}
-      <button 
+      <button
         onClick={() => {
           setIsOpen(true);
           setErrorMsg(null);
         }}
-        className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center z-40 hover:bg-emerald-700 transition-transform active:scale-95"
+        className="lg:hidden fixed bottom-6 right-5 h-14 pl-4 pr-5 bg-coral text-white rounded-full shadow-[0_14px_30px_-10px_rgba(229,113,90,0.8)] flex items-center gap-2 font-semibold z-40 hover:bg-coral-deep transition-colors active:scale-95 cursor-pointer"
+        aria-label="Pitch your idea"
       >
-        <Plus className="w-7 h-7" />
+        <Plus className="w-5 h-5" />
+        Pitch idea
       </button>
 
       {/* Full Screen Modal */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             key="pitch-modal"
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm lg:hidden p-0 sm:p-4"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/50 backdrop-blur-sm lg:hidden p-0 sm:p-4"
           >
-            <div className="w-full h-full max-h-[90vh] sm:h-auto sm:max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-              <div className="bg-emerald-500/10 border-b border-emerald-900/10 px-6 py-4 flex justify-between items-center">
+            <div className="w-full h-full max-h-[90vh] sm:h-auto sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+              <div className="px-6 py-4 flex justify-between items-center border-b border-line">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">Pitch Your Idea</h2>
-                  <p className="text-sm text-slate-600 mt-1">What are you building?</p>
+                  <h2 className="text-xl font-semibold text-ink">Pitch your idea</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">What are you building?</p>
                 </div>
-                <button 
+                <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="p-2 bg-white/50 rounded-full hover:bg-white text-slate-500 hover:text-slate-800 transition-colors"
+                  className="w-10 h-10 rounded-full border border-line text-ink flex items-center justify-center hover:bg-mist transition-colors cursor-pointer"
+                  aria-label="Close"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto">
                 {isSuccess ? (
-                  <div className="p-6 text-center space-y-6">
-                    <div className="text-5xl">🚀</div>
-                    <h2 className="text-2xl font-bold text-slate-800">Pitch Submitted!</h2>
-                    <p className="text-base text-slate-600 leading-relaxed font-semibold">
+                  <div className="p-6 text-center space-y-4">
+                    <div className="mx-auto w-14 h-14 rounded-full bg-teal-light text-teal-deep flex items-center justify-center">
+                      <Rocket className="w-6 h-6" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-ink">Pitch submitted</h2>
+                    <p className="text-sm text-ink-soft leading-relaxed">
                       Your startup idea is now live in the global feed.
                     </p>
-                    <div className="border-t border-slate-100 my-4" />
+                    <div className="border-t border-line my-4" />
                     <div className="text-left font-sans">
                       <NotificationOptIn defaultName={submittedName} />
                     </div>
-                    <Button
+                    <button
                       onClick={() => {
                         setIsSuccess(false);
                         setIsOpen(false);
                         window.location.href = "/ideas";
                       }}
-                      className="w-full font-bold shadow-md bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl h-14 text-lg border"
+                      className="btn btn-ink w-full"
                     >
-                      Back to Feed
-                    </Button>
+                      Back to feed
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="light-theme-form">
-                    <div className="space-y-4 pt-6 px-6 text-slate-900">
+                    <div className="space-y-4 pt-6 px-6 text-ink">
                       {/* Notification opt-in for existing founders */}
                       <NotificationOptIn />
 
                       {/* Anti-Abuse Warning Notice */}
-                      <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 leading-normal font-semibold">
-                        ⚠️ Please do not misuse this platform. Spammers' IP addresses are logged, and invalid submissions are blocked by AI automatically.
+                      <div className="notice notice-warn flex gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <span>Please do not misuse this platform. Spammers&apos; IP addresses are logged, and invalid submissions are blocked by AI automatically.</span>
                       </div>
 
                       {errorMsg && (
-                        <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-xs text-red-800 font-bold leading-normal">
-                          ❌ {errorMsg}
+                        <div className="notice notice-error" role="alert">
+                          {errorMsg}
                         </div>
                       )}
 
                       <div className="space-y-3">
-                        <Input 
-                          name="authorName" 
-                          placeholder="Your Name (Optional)" 
-                          className="bg-slate-50 border-slate-200 h-12 text-slate-900 placeholder:text-slate-400"
+                        <input
+                          name="authorName"
+                          placeholder="Your name (optional)"
+                          className="field"
                         />
-                        <Input 
-                          name="contactInfo" 
-                          placeholder="Contact Phone Number (Optional)" 
-                          className="bg-slate-50 border-slate-200 h-12 text-slate-900 placeholder:text-slate-400"
+                        <input
+                          name="contactInfo"
+                          placeholder="Contact phone number (optional)"
+                          className="field"
                           type="tel"
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <Textarea 
-                          name="content" 
-                          placeholder="I am building a platform that helps..." 
-                          className="min-h-[150px] bg-slate-50 border-slate-200 resize-none text-base text-slate-900 placeholder:text-slate-400"
+                        <textarea
+                          name="content"
+                          placeholder="I am building a platform that helps..."
+                          className="field min-h-[150px]"
                           required
                         />
                       </div>
                     </div>
-                    <div className="bg-slate-50/80 mt-6 pb-8 sm:pb-6 pt-4 px-6 border-t border-slate-100">
-                      <Button 
-                        type="submit" 
-                        disabled={isLoading}
-                        className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-14 text-lg"
-                      >
-                        {isLoading ? "Submitting..." : "Submit Pitch"}
-                      </Button>
+                    <div className="mt-6 pb-8 sm:pb-6 pt-4 px-6 border-t border-line bg-mist/70">
+                      <button type="submit" disabled={isLoading} className="btn btn-coral w-full h-14 text-base">
+                        <Rocket className="w-4 h-4" />
+                        {isLoading ? "Submitting..." : "Submit pitch"}
+                      </button>
                     </div>
                   </form>
                 )}

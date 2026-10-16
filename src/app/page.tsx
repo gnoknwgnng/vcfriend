@@ -4,7 +4,6 @@ import { FounderStories } from "@/components/landing/FounderStories";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { CTASection } from "@/components/landing/CTASection";
-import { Footer } from "@/components/landing/Footer";
 import { supabase } from "@/lib/supabase";
 
 export const revalidate = 60; // Revalidate every minute
@@ -37,10 +36,10 @@ export default async function Home({
     .limit(3);
 
   return (
-    <div className="flex flex-col items-center bg-book-texture min-h-screen relative overflow-hidden">
+    <div className="flex flex-col items-center min-h-screen relative overflow-hidden">
       <div className="relative z-10 w-full flex flex-col items-center">
         {isSuccess && (
-        <div className="w-full bg-emerald-600 text-white text-center py-3 px-4 font-medium animate-in slide-in-from-top fade-in duration-500 shadow-md sticky top-0 z-50">
+        <div className="w-full bg-teal text-white text-center py-3 px-4 text-sm font-medium animate-in slide-in-from-top fade-in duration-500">
           Thank you for your review! Your feedback has been published.
         </div>
       )}
@@ -66,9 +65,6 @@ export default async function Home({
 
       {/* 6. Strong CTA Section */}
       <CTASection />
-
-      {/* 7. Footer */}
-        <Footer />
       </div>
     </div>
   );

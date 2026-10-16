@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AlertTriangle, Send } from "lucide-react";
 import { submitIdeaComment } from "../actions";
 
 interface CommentFormProps {
@@ -18,7 +19,7 @@ export function CommentForm({ ideaId }: CommentFormProps) {
     const formData = new FormData(e.currentTarget);
     const res = await submitIdeaComment(ideaId, formData);
     setIsLoading(false);
-    
+
     if (res?.error) {
       setErrorMsg(res.error);
     } else {
@@ -28,61 +29,40 @@ export function CommentForm({ ideaId }: CommentFormProps) {
   };
 
   return (
-    <div 
-      className="relative flex flex-col p-6 rounded-sm border-2 border-slate-200 bg-white shadow-[6px_6px_24px_rgba(0,0,0,0.28)]"
-      style={{ fontFamily: "var(--font-caveat), cursive" }}
-    >
-      {/* Pin */}
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-red-400 shadow-md border-2 border-white/80 z-10" />
-      {/* Tape */}
-      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-14 h-6 bg-white/40 rounded-sm border border-white/50 shadow-sm" />
-      {/* Lined paper texture */}
-      <div
-        className="absolute inset-0 rounded-sm pointer-events-none opacity-[0.06]"
-        style={{
-          backgroundImage: "repeating-linear-gradient(transparent, transparent 26px, rgba(0,0,0,0.5) 26px, rgba(0,0,0,0.5) 27px)",
-          backgroundPositionY: "44px",
-        }}
-      />
-
-      <div className="mt-3 border-b-2 border-dashed border-slate-200 pb-3 mb-4">
-        <h2 className="text-xl font-bold text-slate-900">Leave Feedback</h2>
-      </div>
+    <div className="surface p-6 md:p-7 mt-8">
+      <h2 className="text-xl font-semibold text-ink">Leave feedback</h2>
+      <p className="mt-1 text-sm text-muted-foreground">Constructive, specific notes help the founder most.</p>
 
       {/* Anti-Abuse Warning Notice */}
-      <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-sm text-[12px] text-red-700 leading-normal font-bold">
-        ⚠️ Please do not misuse this platform. Duplicate replies or spam content are blocked automatically.
+      <div className="notice notice-warn mt-5 flex gap-2">
+        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+        <span>Please do not misuse this platform. Duplicate replies or spam content are blocked automatically.</span>
       </div>
 
       {errorMsg && (
-        <div className="p-3 mb-4 bg-rose-100 border border-rose-300 rounded-sm text-[13px] text-rose-800 font-bold leading-normal">
-          ❌ {errorMsg}
+        <div className="notice notice-error mt-4" role="alert">
+          {errorMsg}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <input 
-            name="authorName" 
-            placeholder="Your Name (Optional)" 
-            className="w-full bg-transparent border-b-2 border-dashed border-slate-200 focus:border-slate-400 placeholder-slate-400 text-slate-900 text-base font-semibold px-1 py-1.5 focus:outline-none"
-          />
+      <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+        <input
+          name="authorName"
+          placeholder="Your name (optional)"
+          className="field"
+        />
+        <textarea
+          name="content"
+          placeholder="What do you think about this idea? How can it be improved?"
+          className="field min-h-[120px]"
+          required
+        />
+        <div className="flex justify-end pt-1">
+          <button type="submit" disabled={isLoading} className="btn btn-coral">
+            <Send className="w-4 h-4" />
+            {isLoading ? "Posting..." : "Post feedback"}
+          </button>
         </div>
-        <div className="space-y-2">
-          <textarea 
-            name="content" 
-            placeholder="What do you think about this idea? How can it be improved?" 
-            className="w-full min-h-[100px] bg-transparent border-2 border-dashed border-slate-200 focus:border-slate-400 placeholder-slate-400 text-slate-900 text-base font-semibold p-2.5 focus:outline-none resize-y rounded-sm"
-            required
-          />
-        </div>
-        <button 
-          type="submit" 
-          disabled={isLoading}
-          className="w-full mt-2 inline-flex items-center justify-center px-6 h-12 rounded-sm border-2 border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-lg shadow-[3px_3px_0px_rgba(0,0,0,0.15)] hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
-        >
-          {isLoading ? "Posting..." : "Post Feedback"}
-        </button>
       </form>
     </div>
   );

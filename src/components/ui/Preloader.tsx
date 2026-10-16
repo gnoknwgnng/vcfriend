@@ -44,47 +44,38 @@ export function Preloader() {
       {isLoading && (
         <motion.div
           key="preloader"
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950 overflow-hidden"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center ink-panel overflow-hidden"
           exit={{ y: "-100%" }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
         >
-          {/* Animated background shimmer */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.15)_0%,_transparent_70%)] pointer-events-none" />
+          <div className="absolute inset-0 dot-grid pointer-events-none" />
 
-          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="mb-12 text-center"
+            className="relative mb-10 text-center"
           >
-            <span className="text-4xl font-extrabold tracking-tight text-white">
-              VC{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
-                Friend
-              </span>
+            <span className="font-display text-4xl font-bold tracking-tight text-white">
+              VC <span className="text-coral">Friend</span>
             </span>
-            <p className="text-slate-500 text-sm mt-2 tracking-widest uppercase">
-              For Founders
-            </p>
+            <p className="text-white/55 text-sm mt-2">Free fundraising tools for founders</p>
           </motion.div>
 
-          {/* Progress bar */}
-          <div className="w-48 h-[2px] bg-white/10 rounded-full overflow-hidden">
+          <div className="relative w-48 h-[3px] bg-white/10 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"
+              className="h-full bg-coral rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: `${count}%` }}
               transition={{ ease: "linear" }}
             />
           </div>
 
-          {/* Counter */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="mt-4 text-slate-500 text-xs font-mono tabular-nums"
+            className="relative mt-4 text-white/50 text-xs font-mono tabular-nums"
           >
             {String(count).padStart(3, "0")}
           </motion.p>
