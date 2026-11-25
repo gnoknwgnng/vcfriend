@@ -4,7 +4,9 @@ import path from 'path';
 
 // Load keys (Assuming you run this script with `node --env-file=.env.local scripts/seed.mjs`)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Seeding deletes and rewrites the whole VC table, so use the service-role key
+// when it is available instead of relying on the public anon key having write access.
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("Missing Supabase keys in environment");

@@ -1,159 +1,113 @@
 "use server";
 
 import { supabase } from "@/lib/supabase";
-import webpush from "web-push";
-import { headers } from "next/headers";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
-const VAPID_EMAIL = process.env.VAPID_EMAIL || "mailto:admin@vcfriend.com";
+interface PushSubscriptionInput {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
 
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+const MAX_MATCHED_PITCHES = 20;
+
+function isValidSubscription(sub: PushSubscriptionInput | null | undefined): sub is PushSubscriptionInput {
+  if (!sub || typeof sub.endpoint !== "string" || typeof sub.p256dh !== "string" || typeof sub.auth !== "string") {
+    return false;
+  }
+  if (sub.endpoint.length > 2048 || sub.p256dh.length > 512 || sub.auth.length > 512) return false;
+  if (!sub.p256dh || !sub.auth) return false;
+  try {
+    return new URL(sub.endpoint).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** Escapes the LIKE wildcards so the value is matched literally (case-insensitively). */
+function escapeLike(value: string): string {
+  return value.replace(/[\\_]/g, (char) => `\\${char}`);
 }
 
 /**
- * Save a push subscription linked to a pitch (found by authorName or phone).
- * Also captures and stores the requester's IP on the matched pitch rows.
+ * Save a push subscription for a pitch.
+ *
+ * - Right after submitting, the form passes the new pitch's id, so the
+ *   subscription is tied to exactly that pitch (this also works for
+ *   anonymous founders).
+ * - Returning founders can instead give the exact name or phone number they
+ *   used when pitching.
  */
 export async function savePushSubscription(
   nameOrPhone: string,
-  subscription: { endpoint: string; p256dh: string; auth: string }
+  subscription: PushSubscriptionInput,
+  ideaId?: string
 ) {
-  if (!nameOrPhone || nameOrPhone.trim() === "") {
-    return { error: "Please enter your name or phone number used when submitting your pitch." };
+  if (!isValidSubscription(subscription)) {
+    return { error: "This browser did not provide a valid notification subscription. Please try again." };
   }
 
-  const query = nameOrPhone.trim();
+  let pitchIds: string[] = [];
 
-  // Capture the visitor's IP address from request headers
-  let ip: string | null = null;
-  try {
-    const headersList = await headers();
-    const rawIp =
-      headersList.get("x-forwarded-for") ||
-      headersList.get("x-real-ip") ||
-      null;
-    ip = rawIp ? rawIp.split(",")[0].trim() : null;
-  } catch (e) {
-    console.error("Failed to read IP from headers:", e);
-  }
+  if (typeof ideaId === "string" && ideaId.trim() !== "") {
+    const { data: pitch, error } = await supabase
+      .from("IdeaPitch")
+      .select("id")
+      .eq("id", ideaId.trim())
+      .maybeSingle();
 
-  // Search by authorName (case-insensitive) OR contactInfo (phone number)
-  const { data: pitches, error: pitchError } = await supabase
-    .from("IdeaPitch")
-    .select("id, authorName, ipAddress")
-    .or(`authorName.ilike.${query},contactInfo.eq.${query}`);
+    if (error || !pitch) {
+      return { error: "We couldn't find that pitch. Please refresh the page and try again." };
+    }
+    pitchIds = [pitch.id];
+  } else {
+    const query = typeof nameOrPhone === "string" ? nameOrPhone.trim() : "";
+    const notFound = { error: "We couldn't find a pitch with that name or phone number. Please check and try again." };
 
-  if (pitchError || !pitches || pitches.length === 0) {
-    return { error: "We couldn't find a pitch with that name or phone number. Please check and try again." };
-  }
+    if (query === "") {
+      return { error: "Please enter your name or phone number used when submitting your pitch." };
+    }
+    // Wildcards would match other founders' pitches, and the default name is
+    // shared by every anonymous pitch, so neither identifies one founder.
+    if (query.length > 80 || /[*%]/.test(query) || query.toLowerCase() === "anonymous founder") {
+      return notFound;
+    }
 
-  // Update ipAddress on pitches that don't already have one
-  if (ip) {
-    const pitchIdsWithoutIp = pitches
-      .filter((p) => !p.ipAddress)
-      .map((p) => p.id);
+    // Two separate, parameterised filters: the input is never spliced into a
+    // PostgREST filter string.
+    const [byName, byPhone] = await Promise.all([
+      supabase.from("IdeaPitch").select("id").ilike("authorName", escapeLike(query)).limit(MAX_MATCHED_PITCHES),
+      supabase.from("IdeaPitch").select("id").eq("contactInfo", query).limit(MAX_MATCHED_PITCHES),
+    ]);
 
-    if (pitchIdsWithoutIp.length > 0) {
-      const { error: updateError } = await supabase
-        .from("IdeaPitch")
-        .update({ ipAddress: ip })
-        .in("id", pitchIdsWithoutIp);
+    if (byName.error || byPhone.error) {
+      console.error("Error looking up pitches for push subscription:", byName.error || byPhone.error);
+      return { error: "Something went wrong while looking up your pitch. Please try again." };
+    }
 
-      if (updateError) {
-        console.error("Failed to update ipAddress on pitch:", updateError);
-      } else {
-        console.log(
-          `[Push] Updated ipAddress (${ip}) on ${pitchIdsWithoutIp.length} pitch(es) for "${query}"`
-        );
-      }
+    pitchIds = [...new Set([...(byName.data ?? []), ...(byPhone.data ?? [])].map((p) => p.id as string))]
+      .slice(0, MAX_MATCHED_PITCHES);
+
+    if (pitchIds.length === 0) {
+      return notFound;
     }
   }
-
-  // Save push subscriptions for all matching pitches
-  const subscriptionsToInsert = pitches.map((p) => ({
-    ideaId: p.id,
-    endpoint: subscription.endpoint,
-    p256dh: subscription.p256dh,
-    auth: subscription.auth,
-  }));
 
   const { error: insertError } = await supabase
     .from("PushSubscription")
-    .upsert(subscriptionsToInsert, { onConflict: "endpoint,ideaId" });
+    .upsert(
+      pitchIds.map((id) => ({
+        ideaId: id,
+        endpoint: subscription.endpoint,
+        p256dh: subscription.p256dh,
+        auth: subscription.auth,
+      })),
+      { onConflict: "endpoint,ideaId" }
+    );
 
   if (insertError) {
     console.error("Error saving push subscription:", insertError);
-    // If table doesn't exist yet, still return success to not break UX
-    return { success: true, pitchCount: pitches.length, tableWarning: true };
+    return { error: "We couldn't save your notification settings. Please try again later." };
   }
 
-  return { success: true, pitchCount: pitches.length };
-}
-
-
-/**
- * Send a push notification to all subscribers of a given pitch.
- */
-export async function sendPushNotification(
-  ideaId: string,
-  commenterName: string,
-  commentContent: string
-) {
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.log("[Push Notification] VAPID keys not configured. Skipping push.");
-    return;
-  }
-
-  // Fetch the pitch info
-  const { data: idea } = await supabase
-    .from("IdeaPitch")
-    .select("authorName")
-    .eq("id", ideaId)
-    .single();
-
-  // Fetch all subscriptions for this pitch
-  const { data: subscriptions, error } = await supabase
-    .from("PushSubscription")
-    .select("endpoint, p256dh, auth")
-    .eq("ideaId", ideaId);
-
-  if (error || !subscriptions || subscriptions.length === 0) {
-    return; // No subscribers for this pitch
-  }
-
-  const founderName = idea?.authorName || "Founder";
-  const preview = commentContent.length > 80 ? commentContent.substring(0, 80) + "..." : commentContent;
-
-  const payload = JSON.stringify({
-    title: `🎉 New feedback on your pitch!`,
-    body: `${commenterName || "Someone"} said: "${preview}"`,
-    url: `/ideas/${ideaId}`,
-  });
-
-  // Send to all subscribers
-  const sendPromises = subscriptions.map(async (sub) => {
-    try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: { p256dh: sub.p256dh, auth: sub.auth },
-        },
-        payload
-      );
-    } catch (err: unknown) {
-      // If subscription expired (410), remove it from DB
-      if (err && typeof err === "object" && "statusCode" in err && (err as { statusCode: number }).statusCode === 410) {
-        await supabase
-          .from("PushSubscription")
-          .delete()
-          .eq("endpoint", sub.endpoint);
-      } else {
-        console.error("[Push Notification] Error sending to subscriber:", err);
-      }
-    }
-  });
-
-  await Promise.allSettled(sendPromises);
+  return { success: true, pitchCount: pitchIds.length };
 }

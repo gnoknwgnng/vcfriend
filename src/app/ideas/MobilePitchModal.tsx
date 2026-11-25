@@ -12,21 +12,30 @@ export function MobilePitchModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
+  const [submittedIdeaId, setSubmittedIdeaId] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // React clears e.currentTarget once the handler yields, so keep the form now.
+    const form = e.currentTarget;
     setIsLoading(true);
     setErrorMsg(null);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(form);
     const authorName = formData.get("authorName") as string;
-    const res = await submitIdea(formData);
-    setIsLoading(false);
-    if (res?.error) {
-      setErrorMsg(res.error);
-    } else {
-      setSubmittedName(authorName || "");
-      setIsSuccess(true);
-      e.currentTarget.reset();
+    try {
+      const res = await submitIdea(formData);
+      if (res?.error) {
+        setErrorMsg(res.error);
+      } else {
+        setSubmittedName(authorName || "");
+        setSubmittedIdeaId(res?.idea?.id);
+        setIsSuccess(true);
+        form.reset();
+      }
+    } catch {
+      setErrorMsg("Something went wrong while submitting. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,7 +73,13 @@ export function MobilePitchModal() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    if (isSuccess) {
+                      setIsSuccess(false);
+                      window.location.href = "/ideas";
+                    }
+                  }}
                   className="w-10 h-10 rounded-full border border-line text-ink flex items-center justify-center hover:bg-mist transition-colors cursor-pointer"
                   aria-label="Close"
                 >
@@ -72,7 +87,7 @@ export function MobilePitchModal() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto" data-lenis-prevent>
                 {isSuccess ? (
                   <div className="p-6 text-center space-y-4">
                     <div className="mx-auto w-14 h-14 rounded-full bg-teal-light text-teal-deep flex items-center justify-center">
@@ -84,7 +99,7 @@ export function MobilePitchModal() {
                     </p>
                     <div className="border-t border-line my-4" />
                     <div className="text-left font-sans">
-                      <NotificationOptIn defaultName={submittedName} />
+                      <NotificationOptIn defaultName={submittedName} ideaId={submittedIdeaId} />
                     </div>
                     <button
                       onClick={() => {
@@ -120,17 +135,20 @@ export function MobilePitchModal() {
                           name="authorName"
                           placeholder="Your name (optional)"
                           className="field"
+                          maxLength={80}
                         />
                         <input
                           name="contactInfo"
-                          placeholder="Contact phone number (optional)"
+                          placeholder="Phone (optional, shown publicly)"
                           className="field"
                           type="tel"
+                          maxLength={60}
                         />
                         <textarea
                           name="content"
                           placeholder="I am building a platform that helps..."
                           className="field min-h-[150px]"
+                          maxLength={5000}
                           required
                         />
                       </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Reveal, RevealGroup } from "@/components/ui/Reveal";
 import { ChevronLeft, ChevronRight, Search, ExternalLink, RefreshCw, Landmark } from "lucide-react";
 
-interface Scheme {
+export interface Scheme {
   name: string;
   level: string;
   state: string;
@@ -16,6 +16,19 @@ interface Scheme {
   eligibility: string;
   beneficiary: string;
   link: string;
+}
+
+// Maps a scheme's free-text support type to one filter bucket.
+// "credits" (cloud/API/software credits) is checked before "credit"
+// (loans and credit guarantees), because the first contains the second.
+function schemeTypeBucket(type: string): string {
+  const t = type.toLowerCase();
+  if (t.includes("grant")) return "Grant";
+  if (t.includes("credits") || t.includes("cloud")) return "Credits";
+  if (t.includes("loan") || t.includes("credit") || t.includes("debt")) return "Loan / Credit";
+  if (t.includes("equity")) return "Equity";
+  if (t.includes("incubation") || t.includes("accelerator")) return "Incubation / Accelerator";
+  return "Other Support";
 }
 
 export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
@@ -41,16 +54,7 @@ export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
   const uniqueTypes = useMemo(() => {
     const types = new Set<string>();
     schemes.forEach((s) => {
-      if (s.type) {
-        // Normalize type briefly
-        let t = s.type.toLowerCase();
-        if (t.includes("grant")) types.add("Grant");
-        else if (t.includes("loan") || t.includes("credit") || t.includes("debt")) types.add("Loan / Credit");
-        else if (t.includes("equity")) types.add("Equity");
-        else if (t.includes("credits") || t.includes("cloud")) types.add("Credits");
-        else if (t.includes("incubation") || t.includes("accelerator")) types.add("Incubation / Accelerator");
-        else types.add("Other Support");
-      }
+      if (s.type) types.add(schemeTypeBucket(s.type));
     });
     return Array.from(types).sort();
   }, [schemes]);
@@ -78,19 +82,10 @@ export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
       // 3. State filter
       const matchesState = 
         stateFilter === "All" ||
-        s.state === stateFilter;
+        (s.state || "").trim() === stateFilter;
 
       // 4. Type filter
-      let matchesType = true;
-      if (typeFilter !== "All") {
-        const t = s.type.toLowerCase();
-        if (typeFilter === "Grant") matchesType = t.includes("grant");
-        else if (typeFilter === "Loan / Credit") matchesType = t.includes("loan") || t.includes("credit") || t.includes("debt");
-        else if (typeFilter === "Equity") matchesType = t.includes("equity");
-        else if (typeFilter === "Credits") matchesType = t.includes("credits") || t.includes("cloud");
-        else if (typeFilter === "Incubation / Accelerator") matchesType = t.includes("incubation") || t.includes("accelerator");
-        else matchesType = !t.includes("grant") && !t.includes("loan") && !t.includes("credit") && !t.includes("debt") && !t.includes("equity") && !t.includes("credits") && !t.includes("cloud") && !t.includes("incubation") && !t.includes("accelerator");
-      }
+      const matchesType = typeFilter === "All" || schemeTypeBucket(s.type || "") === typeFilter;
 
       return matchesSearch && matchesLevel && matchesState && matchesType;
     });
@@ -135,7 +130,7 @@ export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
 
       {/* Filters */}
       <Reveal delay={0.15} className="surface p-4 md:p-5 mb-8 sticky top-[76px] z-20">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 items-end">
           {/* Search Input */}
           <div className="md:col-span-2">
             <label htmlFor="scheme-search" className="field-label">Search schemes</label>
@@ -171,6 +166,25 @@ export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
               <option value="Central">Central Schemes</option>
               <option value="State">State Schemes</option>
               <option value="Corporate/Other">Corporate & Private</option>
+            </select>
+          </div>
+
+          {/* State Filter */}
+          <div>
+            <label htmlFor="scheme-state" className="field-label">State</label>
+            <select
+              id="scheme-state"
+              value={stateFilter}
+              onChange={(e) => {
+                setStateFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="field"
+            >
+              <option value="All">All States</option>
+              {uniqueStates.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
             </select>
           </div>
 
@@ -218,7 +232,7 @@ export function GovernmentSchemesClient({ schemes }: { schemes: Scheme[] }) {
           </button>
         </div>
       ) : (
-        <RevealGroup key={`${currentPage}-${search}-${level}-${typeFilter}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" stagger={0.05} amount={0.02}>
+        <RevealGroup key={`${currentPage}-${search}-${level}-${stateFilter}-${typeFilter}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" stagger={0.05} amount={0.02}>
           {currentSchemes.map((scheme, index) => {
             const levelLabel = scheme.level.includes("Central") ? "Central" : scheme.level.includes("State") ? "State" : "Other";
             return (

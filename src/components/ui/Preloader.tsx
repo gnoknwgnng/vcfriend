@@ -1,19 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const SEEN_KEY = "vc-friend-loaded";
+const subscribeNoop = () => () => {};
+
+function readSeen(): boolean {
+  try {
+    return sessionStorage.getItem(SEEN_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
 export function Preloader() {
-  const [isLoading, setIsLoading] = useState(true);
+  // Only show the preloader if it has not already been shown this session.
+  // (The server render cannot know, so it starts as "not seen".)
+  const seen = useSyncExternalStore(subscribeNoop, readSeen, () => false);
+  const [finished, setFinished] = useState(false);
   const [count, setCount] = useState(0);
+  const isLoading = !seen && !finished;
 
   useEffect(() => {
-    // Only show preloader if not already shown this session
-    const seen = sessionStorage.getItem("vc-friend-loaded");
-    if (seen) {
-      setIsLoading(false);
-      return;
-    }
+    if (seen) return;
 
     // Animate count from 0 to 100
     let start = 0;
@@ -28,8 +38,12 @@ export function Preloader() {
         setCount(100);
         clearInterval(timer);
         setTimeout(() => {
-          setIsLoading(false);
-          sessionStorage.setItem("vc-friend-loaded", "true");
+          setFinished(true);
+          try {
+            sessionStorage.setItem(SEEN_KEY, "true");
+          } catch {
+            // Storage unavailable: the preloader simply shows again next load.
+          }
         }, 150); // snappier hold before sliding away
       } else {
         setCount(Math.floor(start));
@@ -37,7 +51,7 @@ export function Preloader() {
     }, interval);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [seen]);
 
   return (
     <AnimatePresence>

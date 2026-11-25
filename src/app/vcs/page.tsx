@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { firstParam, parsePageParam } from "@/lib/utils";
 import { Reveal, RevealGroup } from "@/components/ui/Reveal";
 import { MapPin, Star, Wallet, ArrowRight, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -14,11 +16,10 @@ export default async function VCDirectory({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const params = await searchParams;
-  const stage = params?.stage as string;
-  const sector = params?.sector as string;
-  const pageStr = params?.page as string;
+  const stage = firstParam(params?.stage).trim();
+  const sector = firstParam(params?.sector).trim();
 
-  const page = parseInt(pageStr) || 1;
+  const page = parsePageParam(params?.page);
   const limit = 18; // Multi-column grid optimized limit
   const start = (page - 1) * limit;
   const end = start + limit - 1;
@@ -46,8 +47,19 @@ export default async function VCDirectory({
   const totalCount = count || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-  const pageHref = (p: number) =>
-    `/vcs?page=${p}${stage ? `&stage=${stage}` : ''}${sector ? `&sector=${sector}` : ''}`;
+  const pageHref = (p: number) => {
+    const search = new URLSearchParams();
+    if (p > 1) search.set("page", String(p));
+    if (stage) search.set("stage", stage);
+    if (sector) search.set("sector", sector);
+    const qs = search.toString();
+    return qs ? `/vcs?${qs}` : "/vcs";
+  };
+
+  // A page number past the end goes back to the first page of the same filters.
+  if (page > 1 && displayVCs.length === 0) {
+    redirect(pageHref(1));
+  }
 
   return (
     <div className="flex-1 bg-mist">

@@ -1,150 +1,115 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { sendPushNotification } from "./push-actions";
+import { after } from "next/server";
+import { supabase } from "@/lib/supabase";
+import { moderateContent } from "@/lib/moderation";
+import { getClientIp } from "@/lib/request-ip";
+import { sendPushNotification } from "@/lib/push";
 
-async function moderatePitchWithAI(content: string): Promise<{ isSpam: boolean; reason?: string }> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    console.warn("GROQ_API_KEY is not configured. Skipping AI moderation.");
-    return { isSpam: false };
-  }
+const DEFAULT_AUTHOR = "Anonymous Founder";
 
+const MAX_PITCH_LENGTH = 5000;
+const MAX_COMMENT_LENGTH = 2000;
+const MAX_NAME_LENGTH = 80;
+const MAX_CONTACT_LENGTH = 60;
+
+// Pitches allowed per IP address in a rolling 24-hour window. A rolling window
+// (rather than a lifetime cap) keeps spam down without permanently locking
+// out founders who share an IP on a mobile network, campus or office.
+const PITCHES_PER_DAY = 2;
+const COMMENTS_PER_PITCH = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function textField(formData: FormData, name: string): string {
+  const value = formData.get(name);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/** Records a blocked submission. Never throws: logging must not break the request. */
+async function logSpam(entry: {
+  content: string;
+  authorName: string;
+  contactInfo?: string | null;
+  ipAddress: string | null;
+  flaggedReason: string;
+}) {
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI content moderator for 'VC Friend', a startup pitching platform.
-Your task is to analyze the text (which could be a startup pitch or a user comment/feedback) and determine if it is spam, contains offensive/profane/bad language, or is otherwise inappropriate.
-
-Determine if the content should be BLOCKED (isSpam = true) based on these rules:
-
-1. PROFANITY & BAD WORDS:
-- Contains swear words, profanity, vulgar language, insults, slurs, or harassment.
-- Any form of offensive, abusive, or inappropriate language.
-
-2. LEGITIMATE startup context:
-- For pitches: Should describe a business idea, product, service, or problem they want to solve.
-- For comments/feedback: Should be constructive questions, feedback, advice, or professional comments about the pitch.
-
-3. SPAM & GIBBERISH:
-- General chat, testing, gibberish (e.g. "asdf", "hello test", "123").
-- Direct advertisements for WhatsApp groups, Telegram channels, marketing agencies, or unrelated services.
-
-Respond ONLY with a JSON object in this format:
-{
-  "isSpam": true/false,
-  "reason": "Brief explanation of why it was blocked (only if isSpam is true)"
-}`
-          },
-          {
-            role: "user",
-            content: content
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.1,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("Groq API error:", await response.text());
-      return { isSpam: false };
-    }
-
-    const data = await response.json();
-    const result = JSON.parse(data.choices[0].message.content);
-    return result;
-  } catch (error) {
-    console.error("Error in AI moderation:", error);
-    return { isSpam: false };
+    const { error } = await supabase.from("Spams").insert([entry]);
+    if (error) console.error("Failed to log spam:", error);
+  } catch (err) {
+    console.error("Failed to log spam:", err);
   }
 }
 
 export async function submitIdea(formData: FormData) {
-  const content = formData.get("content") as string;
-  const authorName = formData.get("authorName") as string;
-  const contactInfo = formData.get("contactInfo") as string;
+  const content = textField(formData, "content");
+  const authorName = textField(formData, "authorName") || DEFAULT_AUTHOR;
+  const contactInfo = textField(formData, "contactInfo") || null;
 
-  if (!content || content.trim() === "") {
+  if (content === "") {
     return { error: "Idea content cannot be empty." };
   }
-
-  // 1. Enforce IP Rate Limiting (Max 2 lifetime submissions)
-  let ip = "127.0.0.1";
-  try {
-    const headersList = await headers();
-    const rawIp = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
-    ip = rawIp.split(",")[0].trim();
-  } catch (e) {
-    console.error("Failed to parse headers/IP:", e);
+  if (content.length > MAX_PITCH_LENGTH) {
+    return { error: `Your pitch is too long. Please keep it under ${MAX_PITCH_LENGTH.toLocaleString()} characters.` };
+  }
+  if (authorName.length > MAX_NAME_LENGTH) {
+    return { error: `Name must be ${MAX_NAME_LENGTH} characters or fewer.` };
+  }
+  if (contactInfo && contactInfo.length > MAX_CONTACT_LENGTH) {
+    return { error: `Contact info must be ${MAX_CONTACT_LENGTH} characters or fewer.` };
   }
 
-  // Count existing submissions from this IP
-  const { count, error: countError } = await supabase
-    .from("IdeaPitch")
-    .select("*", { count: "exact", head: true })
-    .eq("ipAddress", ip);
+  // 1. Enforce IP rate limiting (skipped when the IP cannot be determined)
+  const ip = await getClientIp();
 
-  if (countError) {
-    console.error("Error checking IP submission count:", countError);
-  } else if (count && count >= 2) {
-    // Save to Spams table (fails silently if table is not created yet)
-    try {
-      await supabase
-        .from("Spams")
-        .insert([{ 
-          content, 
-          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-          contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
-          ipAddress: ip,
-          flaggedReason: "IP Rate Limit Exceeded (Max 2 lifetime submissions)"
-        }]);
-    } catch (err) {
-      console.error("Failed to log spam (rate limit):", err);
+  if (ip) {
+    const since = new Date(Date.now() - DAY_MS).toISOString();
+    const { count, error: countError } = await supabase
+      .from("IdeaPitch")
+      .select("id", { count: "exact", head: true })
+      .eq("ipAddress", ip)
+      .gte("createdAt", since);
+
+    if (countError) {
+      console.error("Error checking IP submission count:", countError);
+    } else if ((count ?? 0) >= PITCHES_PER_DAY) {
+      await logSpam({
+        content,
+        authorName,
+        contactInfo,
+        ipAddress: ip,
+        flaggedReason: `IP Rate Limit Exceeded (Max ${PITCHES_PER_DAY} pitches per 24 hours)`,
+      });
+      return {
+        error: `You can submit up to ${PITCHES_PER_DAY} pitches every 24 hours from one network. Please try again tomorrow.`,
+      };
     }
-    return { error: "You have reached the maximum limit of 2 pitches per device/IP address." };
   }
 
   // 2. Enforce AI Moderation (Groq Cloud)
-  const moderation = await moderatePitchWithAI(content);
+  const moderation = await moderateContent(content, "pitch");
   if (moderation.isSpam) {
-    // Save to Spams table (fails silently if table is not created yet)
-    try {
-      await supabase
-        .from("Spams")
-        .insert([{ 
-          content, 
-          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-          contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
-          ipAddress: ip,
-          flaggedReason: `AI Moderation Blocked: ${moderation.reason || "Content does not look like a startup pitch."}`
-        }]);
-    } catch (err) {
-      console.error("Failed to log spam (AI moderation):", err);
-    }
-    return { error: `Submission blocked by AI: ${moderation.reason || "Content does not look like a startup pitch."}` };
+    const reason = moderation.reason || "Content does not look like a startup pitch.";
+    await logSpam({
+      content,
+      authorName,
+      contactInfo,
+      ipAddress: ip,
+      flaggedReason: `AI Moderation Blocked: ${reason}`,
+    });
+    return { error: `Submission blocked by AI: ${reason}` };
   }
 
   const { data, error } = await supabase
     .from("IdeaPitch")
-    .insert([{ 
-      content, 
-      authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-      contactInfo: contactInfo && contactInfo.trim() !== "" ? contactInfo.trim() : null,
-      ipAddress: ip
+    .insert([{
+      content,
+      authorName,
+      contactInfo,
+      ipAddress: ip,
     }])
-    .select()
+    .select("id")
     .single();
 
   if (error) {
@@ -153,95 +118,87 @@ export async function submitIdea(formData: FormData) {
   }
 
   revalidatePath("/ideas");
-  return { success: true, idea: data };
+  revalidatePath("/");
+  // Only the id goes back to the browser (never the stored IP address).
+  return { success: true, idea: { id: data.id as string } };
 }
 
 export async function submitIdeaComment(ideaId: string, formData: FormData) {
-  const content = formData.get("content") as string;
-  const authorName = formData.get("authorName") as string;
-
-  if (!content || content.trim() === "") {
-    return { error: "Comment content cannot be empty." };
+  if (typeof ideaId !== "string" || ideaId.trim() === "") {
+    return { error: "Missing pitch reference." };
   }
 
-  const trimmedContent = content.trim();
+  const content = textField(formData, "content");
+  const authorName = textField(formData, "authorName") || DEFAULT_AUTHOR;
 
-  // 1. Duplicate check (prevent identical comments globally across the entire platform)
+  if (content === "") {
+    return { error: "Comment content cannot be empty." };
+  }
+  if (content.length > MAX_COMMENT_LENGTH) {
+    return { error: `Your feedback is too long. Please keep it under ${MAX_COMMENT_LENGTH.toLocaleString()} characters.` };
+  }
+  if (authorName.length > MAX_NAME_LENGTH) {
+    return { error: `Name must be ${MAX_NAME_LENGTH} characters or fewer.` };
+  }
+
+  // 1. Duplicate check: the same text cannot be posted twice on the same pitch.
   const { data: existingComments, error: dupError } = await supabase
     .from("IdeaComment")
     .select("id")
-    .eq("content", trimmedContent)
+    .eq("ideaId", ideaId)
+    .eq("content", content)
     .limit(1);
 
   if (dupError) {
     console.error("Error checking duplicate comment:", dupError);
   } else if (existingComments && existingComments.length > 0) {
-    return { error: "This feedback/comment has already been posted on the platform." };
+    return { error: "This exact feedback has already been posted on this pitch." };
   }
 
-  // 2. IP Rate Limit for public comments (max 3 comments per IP per pitch thread)
-  let ip = "127.0.0.1";
-  try {
-    const headersList = await headers();
-    const rawIp = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
-    ip = rawIp.split(",")[0].trim();
-  } catch (e) {
-    console.error("Failed to parse headers/IP for comment:", e);
-  }
+  // 2. IP rate limit for public comments (max 3 comments per IP per pitch thread)
+  const ip = await getClientIp();
 
-  const { count, error: countError } = await supabase
-    .from("IdeaComment")
-    .select("*", { count: "exact", head: true })
-    .eq("ideaId", ideaId)
-    .eq("ipAddress", ip);
+  if (ip) {
+    const { count, error: countError } = await supabase
+      .from("IdeaComment")
+      .select("id", { count: "exact", head: true })
+      .eq("ideaId", ideaId)
+      .eq("ipAddress", ip);
 
-  if (countError) {
-    console.error("Error checking IP comment count:", countError);
-  } else if (count && count >= 3) {
-    // Save to Spams table (fails silently if table is not created yet)
-    try {
-      await supabase
-        .from("Spams")
-        .insert([{ 
-          content: trimmedContent, 
-          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-          ipAddress: ip,
-          flaggedReason: "IP Rate Limit Exceeded (Max 3 comments per pitch)"
-        }]);
-    } catch (err) {
-      console.error("Failed to log comment rate limit:", err);
+    if (countError) {
+      console.error("Error checking IP comment count:", countError);
+    } else if ((count ?? 0) >= COMMENTS_PER_PITCH) {
+      await logSpam({
+        content,
+        authorName,
+        ipAddress: ip,
+        flaggedReason: `IP Rate Limit Exceeded (Max ${COMMENTS_PER_PITCH} comments per pitch)`,
+      });
+      return { error: `You have reached the maximum limit of ${COMMENTS_PER_PITCH} replies/feedbacks per pitch.` };
     }
-    return { error: "You have reached the maximum limit of 3 replies/feedbacks per pitch." };
   }
 
   // 3. AI Moderation Check (Groq Cloud)
-  const moderation = await moderatePitchWithAI(trimmedContent);
+  const moderation = await moderateContent(content, "comment");
   if (moderation.isSpam) {
-    // Save to Spams table (fails silently if table is not created yet)
-    try {
-      await supabase
-        .from("Spams")
-        .insert([{ 
-          content: trimmedContent, 
-          authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-          ipAddress: ip,
-          flaggedReason: `AI Moderation Blocked Comment: ${moderation.reason || "gibberish or promotional content"}`
-        }]);
-    } catch (err) {
-      console.error("Failed to log comment AI block:", err);
-    }
+    await logSpam({
+      content,
+      authorName,
+      ipAddress: ip,
+      flaggedReason: `AI Moderation Blocked Comment: ${moderation.reason || "gibberish or promotional content"}`,
+    });
     return { error: `Comment blocked by AI: ${moderation.reason || "Content does not look like a startup feedback."}` };
   }
 
   const { data, error } = await supabase
     .from("IdeaComment")
-    .insert([{ 
+    .insert([{
       ideaId,
-      content: trimmedContent, 
-      authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
-      ipAddress: ip
+      content,
+      authorName,
+      ipAddress: ip,
     }])
-    .select()
+    .select("id")
     .single();
 
   if (error) {
@@ -251,41 +208,8 @@ export async function submitIdeaComment(ideaId: string, formData: FormData) {
 
   revalidatePath(`/ideas/${ideaId}`);
 
-  // Fire push notification to pitch author subscribers (non-blocking)
-  sendPushNotification(ideaId, authorName || "Someone", trimmedContent).catch(() => {});
+  // Runs after the response is sent, and is kept alive by the platform.
+  after(() => sendPushNotification(ideaId, authorName, content));
 
-  return { success: true, comment: data };
-}
-
-export async function submitVCComment(ideaId: string, vcName: string, content: string) {
-  if (!vcName || vcName.trim() === "") {
-    return { error: "VC Firm name cannot be empty." };
-  }
-
-  if (!content || content.trim() === "") {
-    return { error: "Review content cannot be empty." };
-  }
-
-  const { data, error } = await supabase
-    .from("IdeaComment")
-    .insert([{
-      ideaId,
-      content: content.trim(),
-      authorName: `${vcName.trim()} (Investor)`,
-      isVC: true
-    }])
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error submitting VC comment:", error);
-    return { error: "Failed to post VC review. Please try again." };
-  }
-
-  revalidatePath(`/ideas/${ideaId}`);
-
-  // Fire push notification to pitch author subscribers (non-blocking)
-  sendPushNotification(ideaId, `${vcName.trim()} (Investor)`, content.trim()).catch(() => {});
-
-  return { success: true, comment: data };
+  return { success: true, commentId: data.id as string };
 }

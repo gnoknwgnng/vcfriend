@@ -33,7 +33,7 @@ export function Navbar() {
   }, []);
 
   // Always show the bar when the drawer is open
-  useEffect(() => { if (isMenuOpen) setHidden(false); }, [isMenuOpen]);
+  const barHidden = hidden && !isMenuOpen;
 
   const isActive = (matches: string[]) =>
     matches.some((m) => pathname === m || pathname?.startsWith(m + "/"));
@@ -42,7 +42,7 @@ export function Navbar() {
     <>
       <header
         className={`sticky top-0 z-40 w-full transition-[background-color,box-shadow,border-color,transform] duration-300 border-b ${
-          hidden ? "-translate-y-full" : "translate-y-0"
+          barHidden ? "-translate-y-full" : "translate-y-0"
         } ${
           scrolled
             ? "bg-white/85 backdrop-blur-xl border-line shadow-[0_1px_0_rgba(15,42,51,0.04),0_8px_24px_-20px_rgba(15,42,51,0.35)]"

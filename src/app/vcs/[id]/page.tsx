@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Reveal, RevealGroup } from "@/components/ui/Reveal";
+import { normalizeExternalUrl } from "@/lib/utils";
 import { ChevronLeft, MapPin, Star, Globe, Mail, ShieldCheck, PenLine, Users, Link2 } from "lucide-react";
 
 export const revalidate = 60; // Revalidate every minute
@@ -45,7 +46,22 @@ export default async function VCDetailsPage({
     .eq("vcId", id)
     .order("createdAt", { ascending: false });
 
-  const websiteHref = vc.website ? (vc.website.startsWith('http') ? vc.website : `https://${vc.website}`) : '#';
+  // Website values come from a spreadsheet and are not always clean
+  // ("Https://…", "https:www.…", "www.…"), so normalise before linking.
+  const websiteHref = normalizeExternalUrl(vc.website);
+  const linkedinHref = normalizeExternalUrl(vc.linkedin);
+  const twitterHref = normalizeExternalUrl(vc.twitter);
+
+  // Average straight from the published reviews, so it is always current.
+  const reviewRatings = (reviews ?? [])
+    .map((review) => Number(review.rating))
+    .filter((n) => Number.isFinite(n) && n >= 1 && n <= 5);
+  const averageRating =
+    reviewRatings.length > 0
+      ? reviewRatings.reduce((sum, n) => sum + n, 0) / reviewRatings.length
+      : typeof vc.rating === "number" && vc.rating > 0
+        ? vc.rating
+        : null;
 
   return (
     <div className="flex-1 bg-mist">
@@ -79,10 +95,10 @@ export default async function VCDetailsPage({
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-ink leading-[1.02]">{vc.name}</h1>
               <div className="mt-4 flex items-center gap-3">
-                {vc.rating ? (
+                {averageRating ? (
                   <>
-                    <Stars rating={Math.round(vc.rating)} size="w-5 h-5" />
-                    <span className="font-display text-xl font-semibold text-ink">{vc.rating.toFixed(1)}</span>
+                    <Stars rating={Math.round(averageRating)} size="w-5 h-5" />
+                    <span className="font-display text-xl font-semibold text-ink">{averageRating.toFixed(1)}</span>
                     <span className="text-sm text-muted-foreground">
                       from {reviews?.length || 0} founder review{(reviews?.length || 0) === 1 ? "" : "s"}
                     </span>
@@ -94,9 +110,15 @@ export default async function VCDetailsPage({
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-              <Link href={websiteHref} target="_blank" className="btn btn-ghost">
-                <Globe className="w-4 h-4" /> Visit website
-              </Link>
+              {websiteHref ? (
+                <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+                  <Globe className="w-4 h-4" /> Visit website
+                </a>
+              ) : (
+                <span className="btn btn-ghost opacity-50 pointer-events-none" aria-disabled="true">
+                  <Globe className="w-4 h-4" /> No website listed
+                </span>
+              )}
               <Link href={`/vcs/${id}/review`} className="btn btn-coral">
                 <PenLine className="w-4 h-4" /> Write a review
               </Link>
@@ -196,21 +218,21 @@ export default async function VCDetailsPage({
                   </a>
                 ) : null}
 
-                {vc.linkedin ? (
-                  <a href={vc.linkedin.startsWith('http') ? vc.linkedin : `https://${vc.linkedin}`} target="_blank" className="flex items-center gap-3 rounded-xl border border-line px-3.5 py-3 hover:bg-mist transition-colors">
+                {linkedinHref ? (
+                  <a href={linkedinHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-line px-3.5 py-3 hover:bg-mist transition-colors">
                     <Link2 className="w-4 h-4 text-teal shrink-0" />
                     <span className="text-sm font-medium text-ink">LinkedIn profile</span>
                   </a>
                 ) : null}
 
-                {vc.twitter ? (
-                  <a href={vc.twitter.startsWith('http') ? vc.twitter : `https://${vc.twitter}`} target="_blank" className="flex items-center gap-3 rounded-xl border border-line px-3.5 py-3 hover:bg-mist transition-colors">
+                {twitterHref ? (
+                  <a href={twitterHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-line px-3.5 py-3 hover:bg-mist transition-colors">
                     <Link2 className="w-4 h-4 text-teal shrink-0" />
                     <span className="text-sm font-medium text-ink">Twitter (X)</span>
                   </a>
                 ) : null}
 
-                {!vc.email && !vc.linkedin && !vc.twitter && (
+                {!vc.email && !linkedinHref && !twitterHref && (
                   <p className="text-sm text-muted-foreground">No contact information available.</p>
                 )}
               </div>

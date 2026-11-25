@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import { LinkifyText } from "@/components/LinkifyText";
+import { parsePageParam } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, MessageSquareQuote, Flame, Phone } from "lucide-react";
 import { MobilePitchModal } from "./MobilePitchModal";
 import { DesktopPitchForm } from "./DesktopPitchForm";
@@ -18,8 +20,7 @@ export default async function IdeaFeedPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const params = await searchParams;
-  const pageStr = params?.page as string;
-  const page = parseInt(pageStr) || 1;
+  const page = parsePageParam(params?.page);
   const limit = 12; // Snappy feed page limit
   const start = (page - 1) * limit;
   const end = start + limit - 1;
@@ -33,6 +34,12 @@ export default async function IdeaFeedPage({
 
   if (error) {
     console.error("Error fetching ideas:", error);
+  }
+
+  // A page number past the end (old link, or pitches removed) goes back to page 1
+  // instead of showing an empty "0 total" feed.
+  if (page > 1 && (!ideas || ideas.length === 0)) {
+    redirect("/ideas");
   }
 
   const totalCount = count || 0;
@@ -72,7 +79,7 @@ export default async function IdeaFeedPage({
               ) : (
                 <RevealGroup className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start" stagger={0.07}>
                   {ideas.map((idea) => {
-                    const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
+                    const hasVCReview = Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: { isVC?: boolean | null }) => Boolean(comment.isVC));
                     const name = idea.authorName || "Anonymous Founder";
                     return (
                       <article key={idea.id} className="surface surface-hover p-6 flex flex-col">
@@ -148,8 +155,11 @@ export default async function IdeaFeedPage({
               )}
             </div>
 
-            {/* Submit Idea Form (Desktop only) */}
-            <Reveal effect="slide-right" delay={0.2} className="hidden lg:block lg:col-span-1 order-2 lg:sticky lg:top-24 lg:self-start">
+            {/* Submit Idea Form (Desktop only).
+                The form is ~760px tall, so it only sticks while scrolling on
+                screens tall enough to show all of it. On shorter laptop
+                screens a stuck form would keep "Submit pitch" below the fold. */}
+            <Reveal effect="slide-right" delay={0.2} className="hidden lg:block lg:col-span-1 order-2 lg:self-start lg:[@media(min-height:900px)]:sticky lg:[@media(min-height:900px)]:top-24">
               <div id="pitch-form"><DesktopPitchForm /></div>
             </Reveal>
           </div>

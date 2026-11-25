@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Search, Lightbulb, ShieldCheck, BarChart3, Users, ArrowUpRight } from "lucide-react";
-import { Reveal, RevealGroup, SplitWords } from "@/components/ui/Reveal";
+import { Reveal, SplitWords } from "@/components/ui/Reveal";
 
 const FEATURES = [
   {

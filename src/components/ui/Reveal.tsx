@@ -70,7 +70,7 @@ export function Reveal({
   as?: "div" | "section" | "article" | "li" | "span" | "p" | "figure";
 }) {
   const reduce = useReducedMotion();
-  const Comp = (motion as any)[as] as typeof motion.div;
+  const Comp = motion[as] as unknown as typeof motion.div;
   if (reduce) return <Comp className={className}>{children}</Comp>;
   return (
     <Comp
@@ -111,7 +111,7 @@ export function RevealGroup({
   as?: "div" | "ul" | "ol" | "section";
 }) {
   const reduce = useReducedMotion();
-  const Comp = (motion as any)[as] as typeof motion.div;
+  const Comp = motion[as] as unknown as typeof motion.div;
   if (reduce) return <Comp className={className}>{children}</Comp>;
 
   const items = React.Children.toArray(children);
@@ -120,7 +120,7 @@ export function RevealGroup({
       {items.map((child, i) =>
         React.isValidElement(child) ? (
           <motion.div
-            key={(child as any).key ?? i}
+            key={child.key ?? i}
             variants={pickVariants(effect, delay + (i % cols) * stagger)}
             initial="hidden"
             whileInView="visible"
@@ -150,7 +150,8 @@ export function SplitWords({
   delay?: number;
   once?: boolean;
 }) {
-  const ref = useRef<HTMLElement | null>(null);
+  // One ref type that satisfies every tag this component can render.
+  const ref = useRef<(HTMLHeadingElement & HTMLParagraphElement) | null>(null);
   const inView = useInView(ref, { once, margin: "0px 0px -10% 0px" });
   const reduce = useReducedMotion();
   const words = text.split(" ");
@@ -158,7 +159,7 @@ export function SplitWords({
   if (reduce) return <Tag className={className}>{text}</Tag>;
 
   return (
-    <Tag ref={ref as any} className={className} aria-label={text}>
+    <Tag ref={ref} className={className} aria-label={text}>
       {words.map((w, i) => (
         <span key={i} className="inline-block overflow-hidden align-bottom pb-[0.08em] -mb-[0.08em]">
           <motion.span
@@ -190,7 +191,9 @@ export function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const reduce = useReducedMotion();
-  const [display, setDisplay] = useState(value);
+  // Only holds the in-flight number; before and after the animation the
+  // final value is rendered directly.
+  const [animated, setAnimated] = useState<string | null>(null);
 
   const match = value.match(/^([^\d]*)([\d,]+)(.*)$/);
   const prefix = match?.[1] ?? "";
@@ -198,27 +201,26 @@ export function CountUp({
   const suffix = match?.[3] ?? "";
   const hasCommas = match ? match[2].includes(",") : false;
 
+  const shouldAnimate = inView && !reduce && !Number.isNaN(target);
+
   useEffect(() => {
-    if (!inView || reduce || Number.isNaN(target)) {
-      setDisplay(value);
-      return;
-    }
+    if (!shouldAnimate) return;
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / (duration * 1000));
       const eased = 1 - Math.pow(1 - t, 3);
       const n = Math.round(target * eased);
-      setDisplay(`${prefix}${hasCommas ? n.toLocaleString("en-US") : n}${suffix}`);
+      setAnimated(`${prefix}${hasCommas ? n.toLocaleString("en-US") : n}${suffix}`);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, reduce, target, prefix, suffix, hasCommas, duration, value]);
+  }, [shouldAnimate, target, prefix, suffix, hasCommas, duration]);
 
   return (
     <span ref={ref} className={`tabular-nums ${className}`}>
-      {display}
+      {shouldAnimate && animated !== null ? animated : value}
     </span>
   );
 }

@@ -14,8 +14,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || '🎉 New Feedback on Your Pitch!';
   const options = {
     body: data.body || 'Someone just left feedback on your startup pitch.',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/images/logo.png',
+    badge: '/images/logo.png',
     tag: 'pitch-feedback',
     renotify: true,
     data: { url: data.url || '/ideas' },

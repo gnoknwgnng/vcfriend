@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ArrowRight, Building2 } from "lucide-react";
 import Link from "next/link";
-import { Reveal, RevealGroup } from "@/components/ui/Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 
 export default function Onboarding() {
   const router = useRouter();

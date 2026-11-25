@@ -10,21 +10,30 @@ export function DesktopPitchForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
+  const [submittedIdeaId, setSubmittedIdeaId] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // React clears e.currentTarget once the handler yields, so keep the form now.
+    const form = e.currentTarget;
     setIsLoading(true);
     setErrorMsg(null);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(form);
     const authorName = formData.get("authorName") as string;
-    const res = await submitIdea(formData);
-    setIsLoading(false);
-    if (res?.error) {
-      setErrorMsg(res.error);
-    } else {
-      setSubmittedName(authorName || "");
-      setIsSuccess(true);
-      e.currentTarget.reset();
+    try {
+      const res = await submitIdea(formData);
+      if (res?.error) {
+        setErrorMsg(res.error);
+      } else {
+        setSubmittedName(authorName || "");
+        setSubmittedIdeaId(res?.idea?.id);
+        setIsSuccess(true);
+        form.reset();
+      }
+    } catch {
+      setErrorMsg("Something went wrong while submitting. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,7 +52,7 @@ export function DesktopPitchForm() {
 
         <div className="border-t border-line my-5" />
 
-        <NotificationOptIn defaultName={submittedName} />
+        <NotificationOptIn defaultName={submittedName} ideaId={submittedIdeaId} />
 
         <button
           onClick={() => {
@@ -90,17 +99,20 @@ export function DesktopPitchForm() {
           name="authorName"
           placeholder="Your name (optional)"
           className="field"
+          maxLength={80}
         />
         <input
           name="contactInfo"
-          placeholder="Contact info (optional)"
+          placeholder="Phone (optional, shown publicly)"
           className="field"
           type="tel"
+          maxLength={60}
         />
         <textarea
           name="content"
           placeholder="I am building a platform that helps..."
           className="field min-h-[150px]"
+          maxLength={5000}
           required
         />
         <button type="submit" disabled={isLoading} className="btn btn-coral w-full mt-1">

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
+const subscribeNoop = () => () => {};
+
 export function CustomCursor() {
-  const [isMounted, setIsMounted] = useState(false);
+  // False during server render and hydration, true afterwards.
+  const isMounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [isHovering, setIsHovering] = useState(false);
 
   // Use motion values for raw mouse coordinates
@@ -17,8 +20,6 @@ export function CustomCursor() {
   const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    setIsMounted(true);
-
     const moveCursor = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);

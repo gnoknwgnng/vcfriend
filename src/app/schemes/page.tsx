@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { GovernmentSchemesClient } from "./GovernmentSchemesClient";
+import { GovernmentSchemesClient, type Scheme } from "./GovernmentSchemesClient";
 
 export const metadata = {
   title: "Government Funding & Schemes for Startups - VC Friend",
@@ -11,14 +11,14 @@ export default async function GovernmentSchemesPage() {
   // Read schemes from the JSON file at build/request time
   const jsonPath = path.join(process.cwd(), "src/data/government-schemes.json");
   const rawData = fs.readFileSync(jsonPath, "utf8");
-  const schemes = JSON.parse(rawData);
+  const schemes: Scheme[] = JSON.parse(rawData);
 
   // Generate top 15 schemes for structured data indexing
-  const topSchemes = schemes.slice(0, 15).map((scheme: any, idx: number) => ({
+  const topSchemes = schemes.slice(0, 15).map((scheme, idx) => ({
     "@type": "ListItem",
     "position": idx + 1,
     "name": scheme.name,
-    "description": scheme.description || "",
+    "description": scheme.eligibility || "",
     "url": scheme.link || "https://www.vcfriend.online/schemes"
   }));
 
@@ -33,12 +33,12 @@ export default async function GovernmentSchemesPage() {
   };
 
   return (
-    <main className="flex-1 flex flex-col min-h-screen bg-mist">
+    <div className="flex-1 flex flex-col min-h-screen bg-mist">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
       />
       <GovernmentSchemesClient schemes={schemes} />
-    </main>
+    </div>
   );
 }

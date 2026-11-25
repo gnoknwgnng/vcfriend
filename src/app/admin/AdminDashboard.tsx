@@ -1,99 +1,105 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { submitVCComment } from "../ideas/actions";
-import { ChevronLeft, Award, Filter, Search, BarChart3, Tag, MessageSquare, ShieldCheck, ExternalLink, Calendar, Building, LogOut } from "lucide-react";
-import Link from "next/link";
+import { useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { adminLogout, submitVCComment } from "./actions";
+import { Award, Filter, Search, BarChart3, Tag, MessageSquare, Calendar, Building, LogOut } from "lucide-react";
 
 interface Idea {
   id: string;
-  authorName: string;
+  authorName: string | null;
   content: string;
   createdAt: string;
-  contactInfo?: string;
+  contactInfo?: string | null;
 }
 
 interface AdminDashboardProps {
   ideas: Idea[];
 }
 
-// Client-side rule-based sector classifier
+// Client-side rule-based sector classifier.
+// Rules match whole words (or word prefixes via \w*), so "team" is not read
+// as "tea" and "profit" is not read as "fit". The first matching rule wins.
+const SECTOR_RULES: [sector: string, pattern: RegExp][] = [
+  ["Food & Beverage", /\b(coffee|tea|beverages?|foods?|cafes?|snacks?|drinks?)\b/],
+  ["Fintech", /\b(tax(es)?|gst|financ\w*|bank\w*|payments?|wealth|crypto\w*)\b/],
+  ["Agri-tech", /\b(farm\w*|crops?|agricultur\w*|soil|agri\w*|rural)\b/],
+  ["Ed-tech", /\b(schools?|colleges?|educat\w*|students?|learn\w*|courses?|tutor\w*)\b/],
+  ["Health & Wellness", /\b(health\w*|medical|doctors?|wellness|fit|fitness|clinics?|diseases?)\b/],
+  ["AI & DeepTech", /\b(ai|machine learning|deeptech|robot\w*|llms?|artificial)\b/],
+  ["E-Commerce", /\b(shop\w*|e-?commerce|commerce|stores?|buy\w*|marketplaces?|d2c|sell\w*)\b/],
+  ["SaaS & Enterprise", /\b(saas|b2b|software|apis?|automat\w*|cloud)\b/],
+];
+
 function getPitchSector(content: string): string {
   const text = content.toLowerCase();
-  
-  if (text.includes("coffee") || text.includes("tea") || text.includes("beverage") || text.includes("food") || text.includes("cafe") || text.includes("snack") || text.includes("drink")) {
-    return "Food & Beverage";
+  for (const [sector, pattern] of SECTOR_RULES) {
+    if (pattern.test(text)) return sector;
   }
-  if (text.includes("tax") || text.includes("gst") || text.includes("finance") || text.includes("bank") || text.includes("payment") || text.includes("corporate tax") || text.includes("wealth") || text.includes("crypto")) {
-    return "Fintech";
-  }
-  if (text.includes("farm") || text.includes("crop") || text.includes("agriculture") || text.includes("soil") || text.includes("agri") || text.includes("rural")) {
-    return "Agri-tech";
-  }
-  if (text.includes("school") || text.includes("college") || text.includes("education") || text.includes("student") || text.includes("learn") || text.includes("course") || text.includes("tutor")) {
-    return "Ed-tech";
-  }
-  if (text.includes("health") || text.includes("medical") || text.includes("doctor") || text.includes("wellness") || text.includes("fit") || text.includes("clinic") || text.includes("disease")) {
-    return "Health & Wellness";
-  }
-  if (text.includes("ai") || text.includes("machine learning") || text.includes("deeptech") || text.includes("robot") || text.includes("llm") || text.includes("artificial")) {
-    return "AI & DeepTech";
-  }
-  if (text.includes("shop") || text.includes("commerce") || text.includes("store") || text.includes("buy") || text.includes("marketplace") || text.includes("d2c") || text.includes("sell")) {
-    return "E-Commerce";
-  }
-  if (text.includes("saas") || text.includes("b2b") || text.includes("software") || text.includes("api") || text.includes("automation") || text.includes("cloud")) {
-    return "SaaS & Enterprise";
-  }
-  
   return "General / Services";
 }
 
+// The dashboard is rendered on the server and then hydrated in the browser,
+// so dates use one fixed locale and time zone: the two renders must match.
+const pitchDateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Kolkata",
+});
+
+function formatPitchDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : pitchDateFormat.format(date);
+}
+
+// The VC firm name is remembered in localStorage between visits.
+const VC_NAME_KEY = "vc_admin_name";
+const vcNameListeners = new Set<() => void>();
+
+function subscribeVcName(callback: () => void) {
+  vcNameListeners.add(callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    vcNameListeners.delete(callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+function readVcName(): string {
+  try {
+    return localStorage.getItem(VC_NAME_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeVcName(name: string) {
+  try {
+    localStorage.setItem(VC_NAME_KEY, name);
+  } catch {
+    // Storage unavailable (private mode): the name simply is not remembered.
+  }
+  vcNameListeners.forEach((listener) => listener());
+}
+
 export function AdminDashboard({ ideas }: AdminDashboardProps) {
-  const [vcName, setVcName] = useState<string>("");
+  const router = useRouter();
+  const vcName = useSyncExternalStore(subscribeVcName, readVcName, () => "");
   const [activeReviews, setActiveReviews] = useState<{ [ideaId: string]: string }>({});
   const [reviewStatus, setReviewStatus] = useState<{ [ideaId: string]: { loading: boolean; error?: string; success?: boolean } }>({});
-  
+
   // Filtering & search state
   const [selectedSector, setSelectedSector] = useState<string>("All Sectors");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Passcode gate state
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [inputPasscode, setInputPasscode] = useState<string>("");
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  // Restore VC Name and auth state
-  useEffect(() => {
-    const savedVcName = localStorage.getItem("vc_admin_name");
-    if (savedVcName) setVcName(savedVcName);
-
-    const isUnlocked = sessionStorage.getItem("admin_portal_unlocked") === "true";
-    if (isUnlocked) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
   const handleVcNameChange = (name: string) => {
-    setVcName(name);
-    localStorage.setItem("vc_admin_name", name);
+    writeVcName(name);
   };
 
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === "vcfriend") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("admin_portal_unlocked", "true");
-      setAuthError(null);
-    } else {
-      setAuthError("Incorrect passcode. Please try again.");
-    }
-  };
-
-  const handleLogOut = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem("admin_portal_unlocked");
-    setInputPasscode("");
+  const handleLogOut = async () => {
+    await adminLogout();
+    router.refresh();
   };
 
   const handleReviewSubmit = async (ideaId: string) => {
@@ -109,7 +115,12 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
 
     setReviewStatus(prev => ({ ...prev, [ideaId]: { loading: true } }));
 
-    const res = await submitVCComment(ideaId, vcName, content);
+    let res: Awaited<ReturnType<typeof submitVCComment>>;
+    try {
+      res = await submitVCComment(ideaId, vcName, content);
+    } catch {
+      res = { error: "Could not reach the server. Please try again." };
+    }
 
     if (res?.error) {
       setReviewStatus(prev => ({
@@ -150,51 +161,10 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
   const filteredIdeas = classifiedIdeas.filter(idea => {
     const matchesSector = selectedSector === "All Sectors" || idea.sector === selectedSector;
     const matchesSearch = searchQuery.trim() === "" || 
-      idea.authorName.toLowerCase().includes(searchQuery.trim().toLowerCase()) || 
+      (idea.authorName || "").toLowerCase().includes(searchQuery.trim().toLowerCase()) || 
       idea.content.toLowerCase().includes(searchQuery.trim().toLowerCase());
     return matchesSector && matchesSearch;
   });
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-mist font-sans">
-        <div className="max-w-md w-full space-y-6 surface p-8 animate-fade-in text-center">
-          <div className="space-y-4">
-            <div className="mx-auto w-14 h-14 rounded-full bg-teal-light flex items-center justify-center">
-              <ShieldCheck className="w-7 h-7 text-teal-deep" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-ink">
-                Investor Access Portal
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                Please enter the passcode to access the reviews & highlights board.
-              </p>
-            </div>
-            <form onSubmit={handleUnlock} className="mt-8 space-y-4">
-              <input
-                type="password"
-                value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                placeholder="Enter password..."
-                className="field text-center text-lg font-semibold"
-                required
-              />
-              {authError && (
-                <p className="text-coral-deep text-sm font-medium">{authError}</p>
-              )}
-              <button
-                type="submit"
-                className="btn btn-coral w-full"
-              >
-                Unlock Portal
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-mist text-ink font-sans py-8 px-4 sm:px-6 lg:px-8">
@@ -339,7 +309,7 @@ export function AdminDashboard({ ideas }: AdminDashboardProps) {
                         <span className="font-semibold text-sm text-ink">{idea.authorName || "Anonymous Founder"}</span>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
                           <Calendar className="w-3.5 h-3.5" />
-                          <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
+                          <span>{formatPitchDate(idea.createdAt)}</span>
                         </div>
                       </div>
                     </div>

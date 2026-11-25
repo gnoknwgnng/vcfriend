@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-off CommonJS helper script, not part of the app:
+    "download_images.js",
   ]),
 ]);
 

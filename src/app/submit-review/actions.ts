@@ -1,25 +1,36 @@
 "use server";
 
 import { supabase } from "@/lib/supabase";
+import { parseReview } from "@/lib/reviews";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function submitTestimonial(formData: FormData) {
-  const authorName = formData.get("authorName") as string;
-  const content = formData.get("content") as string;
-  const ratingStr = formData.get("rating") as string;
-  const rating = ratingStr ? parseInt(ratingStr, 10) : 5;
+  const parsed = await parseReview(formData);
+  if ("error" in parsed) {
+    return { error: parsed.error };
+  }
+  const { authorName, content, rating } = parsed.review;
 
-  if (!content || content.trim() === "") {
-    return { error: "Review content cannot be empty." };
+  // The same text cannot be posted twice.
+  const { data: existing, error: dupError } = await supabase
+    .from("WebsiteReview")
+    .select("id")
+    .eq("content", content)
+    .limit(1);
+
+  if (dupError) {
+    console.error("Error checking duplicate testimonial:", dupError);
+  } else if (existing && existing.length > 0) {
+    return { error: "This review has already been submitted." };
   }
 
   const { error } = await supabase
     .from("WebsiteReview")
-    .insert([{ 
-      authorName: authorName && authorName.trim() !== "" ? authorName.trim() : "Anonymous Founder",
+    .insert([{
+      authorName,
       content,
-      rating
+      rating,
     }]);
 
   if (error) {

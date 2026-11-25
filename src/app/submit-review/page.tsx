@@ -77,6 +77,7 @@ export default function SubmitReviewPage() {
                 name="content"
                 placeholder="How did VC Friend help you? What did you like about it?"
                 className="field min-h-[160px]"
+              maxLength={3000}
                 required
               />
             </div>

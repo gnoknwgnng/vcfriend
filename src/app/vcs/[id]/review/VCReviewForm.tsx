@@ -81,6 +81,7 @@ export function VCReviewForm({ vcId, vcName }: VCReviewFormProps) {
               name="content"
               placeholder="How was your interaction? Were they helpful? Did they invest?"
               className="field min-h-[160px]"
+              maxLength={3000}
               required
             />
           </div>

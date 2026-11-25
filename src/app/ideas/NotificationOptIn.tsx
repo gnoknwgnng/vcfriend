@@ -8,9 +8,11 @@ type Status = "idle" | "loading" | "success" | "denied" | "error" | "unsupported
 
 interface NotificationOptInProps {
   defaultName?: string;
+  /** Id of the pitch that was just submitted. When set, no name lookup is needed. */
+  ideaId?: string;
 }
 
-export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) {
+export function NotificationOptIn({ defaultName, ideaId }: NotificationOptInProps = {}) {
   const [nameOrPhone, setNameOrPhone] = useState(defaultName || "");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
@@ -18,7 +20,7 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
   const handleEnable = async () => {
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
-    if (!nameOrPhone.trim()) {
+    if (!ideaId && !nameOrPhone.trim()) {
       setStatus("error");
       setMessage("Please enter your name or phone number from your pitch submission.");
       return;
@@ -60,14 +62,23 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
       });
 
       const subJson = subscription.toJSON();
-      const keys = subJson.keys as { p256dh: string; auth: string };
+      const keys = subJson.keys as { p256dh?: string; auth?: string } | undefined;
+      if (!keys?.p256dh || !keys?.auth) {
+        setStatus("error");
+        setMessage("This browser did not return a usable notification subscription. Please try again.");
+        return;
+      }
 
       // 5. Save subscription to DB linked to their pitch
-      const result = await savePushSubscription(nameOrPhone.trim(), {
-        endpoint: subscription.endpoint,
-        p256dh: keys.p256dh,
-        auth: keys.auth,
-      });
+      const result = await savePushSubscription(
+        nameOrPhone.trim(),
+        {
+          endpoint: subscription.endpoint,
+          p256dh: keys.p256dh,
+          auth: keys.auth,
+        },
+        ideaId
+      );
 
       if (result.error) {
         setStatus("error");
@@ -77,7 +88,9 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
 
       setStatus("success");
       setMessage(
-        `✅ Done! We found ${result.pitchCount} pitch${result.pitchCount !== 1 ? "es" : ""} under "${nameOrPhone.trim()}". You'll get notified when you receive feedback!`
+        ideaId
+          ? "✅ Done! You'll get notified when someone leaves feedback on your pitch."
+          : `✅ Done! We found ${result.pitchCount} pitch${result.pitchCount !== 1 ? "es" : ""} under "${nameOrPhone.trim()}". You'll get notified when you receive feedback!`
       );
     } catch (err: unknown) {
       console.error("Push subscription error:", err);
@@ -93,7 +106,7 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
       <div className="flex items-center gap-2 mb-3">
         <Bell className="w-4 h-4 text-teal-deep shrink-0" />
         <span className="text-sm font-semibold text-teal-deep">
-          Already pitched? Get notified on feedback
+          {ideaId ? "Get notified when you receive feedback" : "Already pitched? Get notified on feedback"}
         </span>
       </div>
 
@@ -105,26 +118,33 @@ export function NotificationOptIn({ defaultName }: NotificationOptInProps = {}) 
       ) : (
         <>
           <div className="flex gap-2">
-            <input
+            {!ideaId && <input
               type="text"
               value={nameOrPhone}
               onChange={(e) => { setNameOrPhone(e.target.value); setStatus("idle"); setMessage(""); }}
               placeholder="Your name or phone number"
               className="field flex-1 h-10 text-sm"
               disabled={status === "loading"}
-              onKeyDown={(e) => e.key === "Enter" && handleEnable()}
-            />
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  // Do not submit the surrounding pitch form
+                  e.preventDefault();
+                  handleEnable();
+                }
+              }}
+            />}
             <button
+              type="button"
               onClick={handleEnable}
               disabled={status === "loading"}
-              className="btn btn-teal btn-sm shrink-0"
+              className={`btn btn-teal btn-sm shrink-0 ${ideaId ? "w-full" : ""}`}
             >
               {status === "loading" ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Bell className="w-4 h-4" />
               )}
-              {status === "loading" ? "Linking..." : "Allow"}
+              {status === "loading" ? "Linking..." : ideaId ? "Allow notifications" : "Allow"}
             </button>
           </div>
 

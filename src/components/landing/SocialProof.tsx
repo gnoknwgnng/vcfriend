@@ -4,9 +4,25 @@ import { CountUp, Parallax, Reveal, RevealGroup, SplitWords } from "@/components
 import Link from "next/link";
 import { ArrowRight, MessageSquareQuote, Flame, Star, PenLine } from "lucide-react";
 
+interface Testimonial {
+  id: string;
+  authorName: string | null;
+  content: string;
+  rating: number;
+}
+
+interface LatestIdea {
+  id: string;
+  authorName: string | null;
+  content: string;
+  createdAt: string;
+  contactInfo?: string | null;
+  IdeaComment?: { isVC?: boolean | null }[] | null;
+}
+
 interface SocialProofProps {
-  testimonials: any[];
-  latestIdeas: any[];
+  testimonials: Testimonial[];
+  latestIdeas: LatestIdea[];
   reviewsCount: number;
 }
 
@@ -52,9 +68,9 @@ export function SocialProof({ testimonials, latestIdeas, reviewsCount }: SocialP
                 No pitches yet. <Link href="/ideas" className="text-teal font-semibold hover:underline">Post the first one.</Link>
               </div>
             ) : (
-              latestIdeas.map((idea, index) => {
+              latestIdeas.map((idea) => {
                 const hasVCReview =
-                  Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment: any) => comment.isVC);
+                  Array.isArray(idea.IdeaComment) && idea.IdeaComment.some((comment) => Boolean(comment.isVC));
                 const name =
                   idea.authorName && idea.authorName.trim() !== "" ? idea.authorName : "Anonymous Founder";
                 return (
@@ -157,7 +173,7 @@ export function SocialProof({ testimonials, latestIdeas, reviewsCount }: SocialP
                 </Link>
               </div>
             ) : (
-              testimonials.map((review, index) => (
+              testimonials.map((review) => (
                 <figure
                   key={review.id}
                   className="surface surface-hover p-6 flex flex-col"
